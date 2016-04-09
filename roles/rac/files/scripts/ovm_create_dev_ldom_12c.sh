@@ -99,7 +99,7 @@ IP=`host ${NAME}-mgmt | awk '{print $4}'`
 #ldm set-var "use-nvramrc?=true" $NAME
 echo ldm set-domain cpu-arch=migration-class1 $NAME
 echo ldm set-var "auto-boot?=false" $NAME
-echo ldm set-var "network-boot-arguments=host-ip=${IP},router-ip=130.164.28.1,subnet-mask=255.255.255.0,hostname=${NAME}-mgmt,file=http://130.164.42.236:5555/cgi-bin/wanboot-cgi" $NAME
+echo ldm set-var "network-boot-arguments=host-ip=${IP},router-ip=130.164.28.1,subnet-mask=255.255.255.0,hostname=${NAME}-mgmt,file=http://130.164.51.133:5555/cgi-bin/wanboot-cgi" $NAME
 
 #Bind the domain
 echo ldm bind-domain $NAME
