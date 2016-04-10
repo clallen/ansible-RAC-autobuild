@@ -1,11 +1,11 @@
 ---
-- name: Setup basic NI system attributes
+- name: Common preinstall
   hosts: all
 
   roles:
     - common
 
-- name: Setup RAC attributes
+- name: RAC preinstall
   hosts: rac
 
   roles:
