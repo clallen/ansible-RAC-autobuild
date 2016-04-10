@@ -1,0 +1,7 @@
+---
+cores: 1
+ram: 16
+pad-class: pre-release
+pad-owner: unix_admins
+ai-server-ip: 130.164.51.133
+mgmt-gw: 130.164.28.1
