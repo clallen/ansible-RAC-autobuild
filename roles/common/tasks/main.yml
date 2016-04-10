@@ -1,0 +1,15 @@
+---
+- name: Create domain
+  command: /usr/sbin/ldm add-domain "{{inventory_hostname}}"
+
+- name: Set cores
+  command: /usr/sbin/ldm set-core "{{cores}}" "{{inventory_hostname}}"
+
+- name: Set RAM
+  command: /usr/sbin/ldm set-memory --auto-adj "{{ram}}"G "{{inventory_hostname}}"
+
+- name: Set migration class
+  command: /usr/sbin/ldm set-domain cpu-arch=migration-class1 "{{inventory_hostname}}"
+
+- name: Set netboot args
+  command: /usr/sbin/ldm set-var network-boot-arguments=host-ip="{{mgmt-ip}}",router-ip="{{mgmt-gw}}",subnet-mask="{{mgmt-nm}}",hostname="{{inventory_hostname}}"-mgmt,file=http://"{{ai-server-ip}}":5555/cgi-bin/wanboot-cgi "{{inventory_hostname}}"

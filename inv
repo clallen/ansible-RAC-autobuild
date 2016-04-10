@@ -1,6 +1,6 @@
 [rac]
-aitest1 chassis=rod os-cu=6c os-idx=e8
-aitest2 chassis=rod os-cu=6c os-idx=ec
+aitest1 mgmt-ip=130.164.28.132 chassis=rod os-cu=6c os-idx=e8
+aitest2 mgmt-ip=130.164.28.134 chassis=rod os-cu=6c os-idx=ec
 
 [rac:vars]
 racenv: unix_sand2 

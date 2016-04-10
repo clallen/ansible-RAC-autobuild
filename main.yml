@@ -1,0 +1,12 @@
+---
+- name: Setup basic NI system attributes
+  hosts: all
+
+  roles:
+    - common
+
+- name: Setup RAC attributes
+  hosts: rac
+
+  roles:
+    - rac
