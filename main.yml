@@ -1,12 +1,52 @@
 ---
-- name: Common preinstall
-  hosts: all
+- hosts: all
+  vars:
+        # These usually won't change
+        ai_server_ip: 130.164.51.133
+        mgmt_gw: 130.164.28.1
+        mgmt_nm: 255.255.255.0
+        # These are specific to this domain
+        ldom_name: aitest1
+        mgmt_ip: 130.164.28.88
 
-  roles:
-    - common
-
-- name: RAC preinstall
-  hosts: rac
-
-  roles:
-    - rac
+  tasks:
+  - name: Setup "{{ldom_name}}" domain
+    solaris_ldom:
+        name: "{{ldom_name}}"
+        state: active
+        cores: 1
+        memory: 8
+        domain_vars:
+            {
+            "network-boot-arguments": "host-ip={{mgmt_ip}},router-ip={{mgmt_gw}},subnet-mask={{mgmt_nm}},hostname={{ldom_name}}-mgmt,file=http://{{ai_server_ip}}:5555/cgi-bin/wanboot-cgi",
+            "boot-device": "net",
+            "boot-file": "- install"
+            }
+        vdisks: [
+                    {
+                    "vdisk": "rootdisk0",
+                    "vds": "primary-vds0",
+                    "volume": "{{ldom_name}}-rootdisk0",
+                    "id": 0,
+                    "backend": "/dev/zvol/dsk/rpool/apps/ovm/images/{{ldom_name}}"
+                    },
+                    {
+                    "vdisk": "appdisk0",
+                    "vds": "primary-vds0",
+                    "volume": "{{ldom_name}}-appdisk0",
+                    "id": 1,
+                    "backend": "/dev/zvol/dsk/rpool/apps/ovm/images/{{ldom_name}}-app"
+                    }
+                ]
+        vnets: [
+                    {
+                    "vnet": "mgmt0",
+                    "vswitch": "primary-vsw0",
+                    "id": 0,
+                    "pvid": 1
+                    }
+               ]
+  - name: Give domain time to boot
+    wait_for: timeout=30
+  - name: Remove boot install flag
+    solaris_ldom: name="{{ldom_name}}" domain_vars={ "boot-file": }
