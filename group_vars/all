@@ -1,8 +1,14 @@
----
+# base network defaults
+ai-server-ip: 130.164.51.133
+mgmt-gw: 130.164.28.1
+mgmt-nm: 255.255.255.0
+
+# base LDOM defaults
 cores: 1
 ram: 16
 pad-class: pre-release
 pad-owner: unix_admins
-ai-server-ip: 130.164.51.133
-mgmt-gw: 130.164.28.1
-mgmt-nm: 255.255.255.0
+
+# SAN frame device numbers
+gs5: 60060E8016047100000104710000
+gs6: 60060E80166BCD0000016BCD0000

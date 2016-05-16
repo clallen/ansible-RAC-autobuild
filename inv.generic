@@ -1,2 +1,0 @@
-[generic]
-autobuild1 cores=2 ram=8 pad-class=post-release mgmt-ip=130.164.28.10 mgmt-nm=255.255.255.0 horcminst=6 os-cu=6c os-idx=e8
