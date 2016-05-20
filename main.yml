@@ -1,6 +1,13 @@
 ---
-- hosts: all
+- hosts: raidcom
   vars:
+  tasks:
+  - name: Setup SAN storage
+    ldevblock:
+      name: AUTOBLD_TEST
+      pool: 36
+      begin: 6C:48
+      end: 6C:4F
     
 - hosts: all
   vars:
