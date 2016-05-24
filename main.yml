@@ -3,13 +3,17 @@
   vars:
   tasks:
   - name: Setup SAN storage
+    # test blocks:
+    # OS: 6c:48-4f
+    # ENV: 6c:94-9f
     ldevblock:
       name: AUTOBLD_TEST
       pool: 36
       begin: 6C:48
-      end: 6C:4F
+      end: 6C:4b
+      size: 50g
     
-- hosts: all
+- hosts: cdoms
   vars:
     # These usually won't change
     ai_server_ip: 130.164.51.133
