@@ -1,15 +1,18 @@
 ---
-- hosts: control
+- hosts: raidcom
   tasks:
   - name: Setup OS storage
     ldevblock:
       name: "{{ldom_name}}_OS"
+      hosts: "{{ldom_chassis}}"
       horcm: "{{horcm}}"
       pool: "{{os_pool}}"
-      hosts: [ "{{inventory_hostname}}" ]
       begin: "{{os_begin}}"
       end: "{{os_end}}"
       size: "{{os_size}}"
+
+- hosts: control
+  tasks:
   - name: Setup "{{ldom_name}}" domain
     solaris_ldom:
       state: active
@@ -24,6 +27,7 @@
         }
       rac_dbvers: "{{rac_dbvers}}"
       rac_envs: "{{rac_envs}}"
+      vnets: "{{mgmt_vnet}}"
   - name: Give domain time to boot
     wait_for: timeout=30
   - name: Remove boot install flag

@@ -28,3 +28,5 @@
       begin: "{{env_ocr_begin}}"
       end: "{{env_ocr_end}}"
       size: "{{env_ocr_size}}"
+
+# vim: tabstop=2 shiftwidth=2
