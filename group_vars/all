@@ -1,14 +1,37 @@
-# base network defaults
-ai-server-ip: 130.164.51.133
-mgmt-gw: 130.164.28.1
-mgmt-nm: 255.255.255.0
+# AI network defaults
+ai_server_ip: 130.164.51.133
+mgmt_gw: 130.164.28.1
+mgmt_nm: 255.255.255.0
 
-# base LDOM defaults
-cores: 1
-ram: 16
-pad-class: pre-release
-pad-owner: unix_admins
+  # test blocks on GS6:
+  # OS: 6c:48-4f
+  # ENV: 6c:94-9f
 
-# SAN frame device numbers
-gs5: 60060E8016047100000104710000
-gs6: 60060E80166BCD0000016BCD0000
+# LDOM-specific (needs to be changed for each run)
+ldom_name: aitest1
+cores: "1"
+memory: "16"
+mgmt_ip: "130.164.28.88"
+horcm: "6"
+os_pool: "36"
+os_begin: "6c:48"
+os_end: "6c:4b"
+os_size: "50"
+rac_dbvers: "12.2.1.3"
+rac_envs: [ "AITEST_ENV" ]
+# env-specific
+env_chassis: [ "todd" ]
+env_name: "AITEST_ENV"
+env_data_begin: "6C:94"
+env_data_end: "6C:9b"
+env_data_size: "1024"
+env_fra_begin: "6C:9c"
+env_fra_end: "6C:9d"
+env_fra_size: "500"
+env_ocr_begin: "6C:9e"
+env_ocr_end: "6C:9f"
+env_ocr_size: "100"
+
+# these will probably go into post-inst
+#pad_class: pre-release
+#pad_owner: unix_admins

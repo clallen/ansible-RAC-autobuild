@@ -1,0 +1,34 @@
+---
+- hosts: control
+  tasks:
+  - name: Setup OS storage
+    ldevblock:
+      name: "{{ldom_name}}_OS"
+      horcm: "{{horcm}}"
+      pool: "{{os_pool}}"
+      hosts: [ "{{inventory_hostname}}" ]
+      begin: "{{os_begin}}"
+      end: "{{os_end}}"
+      size: "{{os_size}}"
+  - name: Setup "{{ldom_name}}" domain
+    solaris_ldom:
+      state: active
+      name: "{{ldom_name}}"
+      cores: "{{cores}}"
+      memory: "{{memory}}"
+      domain_vars:
+        {
+        "network-boot-arguments": "host-ip={{mgmt_ip}},router-ip={{mgmt_gw}},subnet-mask={{mgmt_nm}},hostname={{ldom_name}}-mgmt,file=http://{{ai_server_ip}}:5555/cgi-bin/wanboot-cgi",
+        "boot-device": "net",
+        "boot-file": "- install"
+        }
+      rac_dbvers: "{{rac_dbvers}}"
+      rac_envs: "{{rac_envs}}"
+  - name: Give domain time to boot
+    wait_for: timeout=30
+  - name: Remove boot install flag
+    solaris_ldom:
+      name: "{{ldom_name}}"
+      domain_vars: { "boot-file": }
+
+# vim: tabstop=2 shiftwidth=2
