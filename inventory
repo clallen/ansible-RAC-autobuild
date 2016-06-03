@@ -1,5 +1,8 @@
+[raidcom]
+skeeter
+
 [control]
 todd
 
-[raidcom]
-skeeter
+[postinst]
+aitest1

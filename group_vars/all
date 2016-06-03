@@ -21,7 +21,12 @@ os_end: "6c:4b"
 os_size: "50"
 rac_dbvers: "12.2.1.3"
 rac_envs: [ "AITEST_ENV" ]
-mgmt_vnet: [ { "vnet": "mgmt0", "vswitch": "primary-vsw0", "id": "0", "pvid": "1" } ]
+vnets: [ { "vnet": "mgmt0", "vswitch": "primary-vsw0", "id": "0", "pvid": "1" },
+         { "vnet": "pubnet0", "vswitch": "primary-vsw1", "id": "1", "pvid": "1322" },
+         { "vnet": "pubnet1", "vswitch": "primary-vsw1", "id": "2", "pvid": "1322" },
+         { "vnet": "privnet0", "vswitch": "primary-vsw2", "id": "3", "pvid": "913" },
+         { "vnet": "privnet1", "vswitch": "primary-vsw2", "id": "4", "pvid": "913" } ]
+
 # env-specific
 env_name: "AITEST_ENV"
 env_pool: "36"
@@ -37,6 +42,7 @@ env_ocr_begin: "6C:9e"
 env_ocr_end: "6C:9f"
 env_ocr_size: "100"
 
-# these will probably go into post-inst
+# postinstall
+salt_master_ip: 130.164.51.132
 #pad_class: pre-release
 #pad_owner: unix_admins

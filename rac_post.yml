@@ -1,0 +1,12 @@
+---
+- name: Common postinstall
+  hosts: all
+
+  roles:
+    - common
+
+- name: RAC postinstall
+  hosts: rac
+
+  roles:
+    - rac

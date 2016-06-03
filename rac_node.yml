@@ -27,7 +27,7 @@
         }
       rac_dbvers: "{{rac_dbvers}}"
       rac_envs: "{{rac_envs}}"
-      vnets: "{{mgmt_vnet}}"
+      vnets: "{{vnets}}"
   - name: Give domain time to boot
     wait_for: timeout=10
   - name: Remove boot install flag

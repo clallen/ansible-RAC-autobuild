@@ -1,0 +1,44 @@
+---
+- name: Remove IP-based Solaris repo
+  pkg5_publisher:
+    name: solaris
+    state: absent
+
+- name: Add name-based Solaris repo
+  pkg5_publisher:
+    name: solaris
+    origin: http://aisalt.natinst.com
+    sticky: true
+
+- name: Add site repo
+  pkg5_publisher:
+    name: site
+    origin: http://aisalt.natinst.com:81
+    sticky: true
+
+- name: Install packages
+  pkg5:
+    name:
+      - salt
+      - ucb
+      - vim
+
+- name: Add Salt master to /etc/hosts
+  lineinfile:
+    dest: /etc/hosts
+    line: "{{salt_master_ip}}	salt"
+
+- name: Enable Salt minion
+  service:
+    name: salt-minion
+    enabled: yes
+
+- name: Copy distribution files
+  unarchive:
+    src: distfiles.tar.gz
+    dest: /
+
+- name: Import manifests
+  service:
+    name: manifest-import
+    state: restarted
