@@ -4,8 +4,8 @@
   - name: Setup OS storage
     ldevblock:
       name: "{{ldom_name}}_OS"
-      hosts: "{{ldom_chassis}}"
       horcm: "{{horcm}}"
+      hosts: "{{os_chassis}}"
       pool: "{{os_pool}}"
       begin: "{{os_begin}}"
       end: "{{os_end}}"
@@ -29,7 +29,7 @@
       rac_envs: "{{rac_envs}}"
       vnets: "{{mgmt_vnet}}"
   - name: Give domain time to boot
-    wait_for: timeout=30
+    wait_for: timeout=10
   - name: Remove boot install flag
     solaris_ldom:
       name: "{{ldom_name}}"
