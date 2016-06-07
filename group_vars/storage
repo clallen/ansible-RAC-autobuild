@@ -1,8 +1,7 @@
-  # test blocks on GS6:
-  # OS: 6c:48-4f
-  # ENV: 6c:94-9f
+# Used prior to domain setup
+# - OS storage will need to be changed before each node creation run
 
-# RAC env-specific (only used once per env)
+# RAC env-specific
 env_name: "AITEST_ENV"
 env_pool: "36"
 env_chassis: [ "todd" ]
@@ -17,10 +16,17 @@ env_ocr_begin: "6C:9e"
 env_ocr_end: "6C:9f"
 env_ocr_size: "100"
 
-# RAC node OS (changed per node)
+# RAC node OS
 os_pool: "36"
 os_chassis: [ "todd" ]
 os_ports: [ "CL1-B", "CL2-B" ]
 os_begin: "6c:48"
 os_end: "6c:4b"
 os_size: "50"
+
+
+# notes:
+#
+# test blocks on GS6:
+# OS: 6c:48-4f
+# ENV: 6c:94-9f

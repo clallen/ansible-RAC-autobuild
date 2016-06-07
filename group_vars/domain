@@ -1,3 +1,6 @@
+# Used after domain OS install
+#
+
 salt_master_ip: 130.164.51.132
 #pad_class: pre-release
 #pad_owner: unix_admins

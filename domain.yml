@@ -1,6 +1,5 @@
 ---
 - hosts: domain
-
   tasks:
 - name: Remove IP-based Solaris repo
   pkg5_publisher:

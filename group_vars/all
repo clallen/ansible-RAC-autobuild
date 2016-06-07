@@ -1,3 +1,3 @@
 # HORCM instance
-# (needed for use in "storage" and "domain" groups)
+# (needed in storage and domain groups)
 horcm: "6"

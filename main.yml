@@ -7,4 +7,8 @@
   tasks:
     - include: chassis.yml
 
+- hosts: domain
+  tasks:
+    - include: domain.yml
+
 # vim: tabstop=2 shiftwidth=2

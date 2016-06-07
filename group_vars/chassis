@@ -1,9 +1,7 @@
-# AI network defaults
-ai_server_ip: 130.164.51.133
-mgmt_gw: 130.164.28.1
-mgmt_nm: 255.255.255.0
+# Used during domain setup and install
+#
 
-# LDOM-specific (needs to be changed for each domain)
+# domain-specific
 ldom_name: "aitest1"
 cores: "1"
 memory: "8"
@@ -15,3 +13,8 @@ vnets: [ { "vnet": "mgmt0", "vswitch": "primary-vsw0", "id": "0", "pvid": "1" },
          { "vnet": "pubnet1", "vswitch": "primary-vsw1", "id": "2", "pvid": "1322" },
          { "vnet": "privnet0", "vswitch": "primary-vsw2", "id": "3", "pvid": "913" },
          { "vnet": "privnet1", "vswitch": "primary-vsw2", "id": "4", "pvid": "913" } ]
+
+# AI and management network defaults (usually will not change)
+ai_server_ip: 130.164.51.133
+mgmt_gw: 130.164.28.1
+mgmt_nm: 255.255.255.0
