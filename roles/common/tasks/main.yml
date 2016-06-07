@@ -33,11 +33,6 @@
     name: salt-minion
     enabled: yes
 
-- name: Copy distribution files
-  unarchive:
-    src: distfiles.tar.gz
-    dest: /
-
 - name: Import manifests
   service:
     name: manifest-import

@@ -30,4 +30,4 @@
   command: /tmp/scripts/ovm_rac_net_cfg.sh "{{inventory_hostname}}"
 
 - name: Setup horcm
-  command: /tmp/scripts/horcm_setup.sh "{{horcminst}}"
+  command: /tmp/scripts/horcm_setup.sh "{{horcm}}"

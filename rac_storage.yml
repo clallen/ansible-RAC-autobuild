@@ -1,7 +1,7 @@
 ---
 - hosts: raidcom
   tasks:
-  - name: Setup env DATA storage
+  - name: Setup DATA storage for RAC environment "{{env_name}}"
     ldevblock:
       name: "{{env_name}}_DATA"
       horcm: "{{horcm}}"
@@ -10,7 +10,7 @@
       begin: "{{env_data_begin}}"
       end: "{{env_data_end}}"
       size: "{{env_data_size}}"
-  - name: Setup env FRA storage
+  - name: Setup FRA storage for RAC environment "{{env_name}}"
     ldevblock:
       name: "{{env_name}}_FRA"
       horcm: "{{horcm}}"
@@ -19,7 +19,7 @@
       begin: "{{env_fra_begin}}"
       end: "{{env_fra_end}}"
       size: "{{env_fra_size}}"
-  - name: Setup env OCR storage
+  - name: Setup OCR storage for RAC environment "{{env_name}}"
     ldevblock:
       name: "{{env_name}}_OCR"
       horcm: "{{horcm}}"

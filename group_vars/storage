@@ -1,0 +1,26 @@
+  # test blocks on GS6:
+  # OS: 6c:48-4f
+  # ENV: 6c:94-9f
+
+# RAC env-specific (only used once per env)
+env_name: "AITEST_ENV"
+env_pool: "36"
+env_chassis: [ "todd" ]
+env_ports: [ "CL1-B", "CL2-B" ]
+env_data_begin: "6C:94"
+env_data_end: "6C:9b"
+env_data_size: "1024"
+env_fra_begin: "6C:9c"
+env_fra_end: "6C:9d"
+env_fra_size: "500"
+env_ocr_begin: "6C:9e"
+env_ocr_end: "6C:9f"
+env_ocr_size: "100"
+
+# RAC node OS (changed per node)
+os_pool: "36"
+os_chassis: [ "todd" ]
+os_ports: [ "CL1-B", "CL2-B" ]
+os_begin: "6c:48"
+os_end: "6c:4b"
+os_size: "50"

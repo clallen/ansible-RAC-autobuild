@@ -1,7 +1,7 @@
 ---
 - hosts: raidcom
   tasks:
-  - name: Setup OS storage
+  - name: Setup OS storage for domain "{{ldom_name}}" on "{{inventory_hostname}"
     ldevblock:
       name: "{{ldom_name}}_OS"
       horcm: "{{horcm}}"
@@ -11,9 +11,9 @@
       end: "{{os_end}}"
       size: "{{os_size}}"
 
-- hosts: control
+- hosts: pre
   tasks:
-  - name: Setup "{{ldom_name}}" domain
+  - name: Setup domain "{{ldom_name}}" on "{{inventory_hostname}"
     solaris_ldom:
       state: active
       name: "{{ldom_name}}"
