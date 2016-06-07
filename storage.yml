@@ -1,7 +1,19 @@
 ---
-- hosts: raidcom
+- hosts: chassis
   tasks:
-  - name: Setup DATA storage for RAC environment "{{env_name}}"
+  - name: Setup OS storage for domain "{{ldom_name}}" on "{{inventory_hostname}}"
+    ldevblock:
+      name: "{{ldom_name}}_OS"
+      horcm: "{{horcm}}"
+      hosts: "{{os_chassis}}"
+      pool: "{{os_pool}}"
+      begin: "{{os_begin}}"
+      end: "{{os_end}}"
+      size: "{{os_size}}"
+
+- hosts: storage
+  tasks:
+  - name: Setup DATA storage for RAC environment "{{env_name}}" on "{{env_chassis}}"
     ldevblock:
       name: "{{env_name}}_DATA"
       horcm: "{{horcm}}"
@@ -10,7 +22,7 @@
       begin: "{{env_data_begin}}"
       end: "{{env_data_end}}"
       size: "{{env_data_size}}"
-  - name: Setup FRA storage for RAC environment "{{env_name}}"
+  - name: Setup FRA storage for RAC environment "{{env_name}}" on "{{env_chassis}}"
     ldevblock:
       name: "{{env_name}}_FRA"
       horcm: "{{horcm}}"
@@ -19,7 +31,7 @@
       begin: "{{env_fra_begin}}"
       end: "{{env_fra_end}}"
       size: "{{env_fra_size}}"
-  - name: Setup OCR storage for RAC environment "{{env_name}}"
+  - name: Setup OCR storage for RAC environment "{{env_name}}" on "{{env_chassis}}"
     ldevblock:
       name: "{{env_name}}_OCR"
       horcm: "{{horcm}}"

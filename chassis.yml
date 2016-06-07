@@ -1,19 +1,7 @@
 ---
-- hosts: raidcom
+- hosts: chassis
   tasks:
-  - name: Setup OS storage for domain "{{ldom_name}}" on "{{inventory_hostname}"
-    ldevblock:
-      name: "{{ldom_name}}_OS"
-      horcm: "{{horcm}}"
-      hosts: "{{os_chassis}}"
-      pool: "{{os_pool}}"
-      begin: "{{os_begin}}"
-      end: "{{os_end}}"
-      size: "{{os_size}}"
-
-- hosts: pre
-  tasks:
-  - name: Setup domain "{{ldom_name}}" on "{{inventory_hostname}"
+  - name: Setup domain "{{ldom_name}}" on "{{inventory_hostname}}"
     solaris_ldom:
       state: active
       name: "{{ldom_name}}"

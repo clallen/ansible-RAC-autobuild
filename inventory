@@ -1,8 +1,8 @@
-[raidcom]
+[storage]
 skeeter
 
-[pre]
+[chassis]
 todd
 
-[post]
+[domain]
 aitest1

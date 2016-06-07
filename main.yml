@@ -1,0 +1,10 @@
+---
+- hosts: storage
+  tasks:
+    - include: storage.yml
+
+- hosts: chassis
+  tasks:
+    - include: chassis.yml
+
+# vim: tabstop=2 shiftwidth=2
