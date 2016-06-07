@@ -7,10 +7,25 @@ mgmt_nm: 255.255.255.0
   # OS: 6c:48-4f
   # ENV: 6c:94-9f
 
-# LDOM-specific (needs to be changed for each run)
+# env-specific (only used once per env)
+env_name: "AITEST_ENV"
+env_pool: "36"
+env_chassis: [ "todd" ]
+env_ports: [ "CL1-B", "CL2-B" ]
+env_data_begin: "6C:94"
+env_data_end: "6C:9b"
+env_data_size: "1024"
+env_fra_begin: "6C:9c"
+env_fra_end: "6C:9d"
+env_fra_size: "500"
+env_ocr_begin: "6C:9e"
+env_ocr_end: "6C:9f"
+env_ocr_size: "100"
+
+# LDOM-specific (needs to be changed for each domain)
 ldom_name: "aitest1"
 cores: "1"
-memory: "16"
+memory: "8"
 mgmt_ip: "130.164.28.88"
 horcm: "6"
 os_pool: "36"
@@ -26,21 +41,6 @@ vnets: [ { "vnet": "mgmt0", "vswitch": "primary-vsw0", "id": "0", "pvid": "1" },
          { "vnet": "pubnet1", "vswitch": "primary-vsw1", "id": "2", "pvid": "1322" },
          { "vnet": "privnet0", "vswitch": "primary-vsw2", "id": "3", "pvid": "913" },
          { "vnet": "privnet1", "vswitch": "primary-vsw2", "id": "4", "pvid": "913" } ]
-
-# env-specific
-env_name: "AITEST_ENV"
-env_pool: "36"
-env_chassis: [ "todd" ]
-env_ports: [ "CL1-B", "CL2-B" ]
-env_data_begin: "6C:94"
-env_data_end: "6C:9b"
-env_data_size: "1024"
-env_fra_begin: "6C:9c"
-env_fra_end: "6C:9d"
-env_fra_size: "500"
-env_ocr_begin: "6C:9e"
-env_ocr_end: "6C:9f"
-env_ocr_size: "100"
 
 # postinstall
 salt_master_ip: 130.164.51.132
