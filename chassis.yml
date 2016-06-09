@@ -1,7 +1,5 @@
 ---
-- hosts: chassis
-  tasks:
-  - name: Setup domain "{{ldom_name}}" on "{{inventory_hostname}}"
+  - name: Setup domain {{ldom_name}} on {{inventory_hostname}}
     solaris_ldom:
       state: active
       name: "{{ldom_name}}"

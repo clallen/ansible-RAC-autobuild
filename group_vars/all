@@ -1,3 +1,5 @@
-# HORCM instance
-# (needed in storage and domain groups)
+# Used in all groups
+#
+
 horcm: "6"
+ldom_name: "aitest2"

@@ -20,8 +20,8 @@ env_ocr_size: "100"
 os_pool: "36"
 os_chassis: [ "todd" ]
 os_ports: [ "CL1-B", "CL2-B" ]
-os_begin: "6c:48"
-os_end: "6c:4b"
+os_begin: "6c:4c"
+os_end: "6c:4f"
 os_size: "50"
 
 
