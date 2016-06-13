@@ -1,7 +1,7 @@
 ---
   - name: Setup domain {{ldom_name}} on {{inventory_hostname}}
     solaris_ldom:
-      state: active
+      state: "{{state}}"
       name: "{{ldom_name}}"
       cores: "{{cores}}"
       memory: "{{memory}}"

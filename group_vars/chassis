@@ -2,9 +2,13 @@
 #
 
 # domain-specific
+# state:
+# - active: domain will be booted and installed
+# - deleted: domain will be shut down and removed (all other vars are ignored)
+state: active
 cores: "1"
 memory: "8"
-mgmt_ip: "130.164.28.116"
+mgmt_ip: "130.164.28.88"
 rac_dbvers: "12.2.1.3"
 rac_envs: [ "AITEST_ENV" ]
 vnets: [ { "vnet": "mgmt0", "vswitch": "primary-vsw0", "id": "0", "pvid": "1" },

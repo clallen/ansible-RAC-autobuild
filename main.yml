@@ -7,8 +7,9 @@
   tasks:
     - include: chassis.yml
 
-- hosts: domain
-  tasks:
-    - include: domain.yml
+# TODO: figure out a way to tell when OS install is finished to kick off this part
+#- hosts: domain
+#  tasks:
+#    - include: domain.yml
 
 # vim: tabstop=2 shiftwidth=2
