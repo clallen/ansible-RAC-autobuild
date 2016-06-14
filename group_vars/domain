@@ -1,6 +1,11 @@
 # Used after domain OS install
 #
 
+solaris_repo: http://aisalt.natinst.com
+site_repo: http://aisalt.natinst.com:81
 salt_master_ip: 130.164.51.132
+oracle_uid: 10
+grid_uid: 61001
+oinstall_gid: 111
 #pad_class: pre-release
 #pad_owner: unix_admins

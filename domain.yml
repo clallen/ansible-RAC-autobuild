@@ -7,13 +7,13 @@
 - name: Add name-based Solaris repo
   pkg5_publisher:
     name: solaris
-    origin: http://aisalt.natinst.com
+    origin: "{{solaris_repo}}"
     sticky: true
 
 - name: Add site repo
   pkg5_publisher:
     name: site
-    origin: http://aisalt.natinst.com:81
+    origin: "{{site_repo}}"
     sticky: true
 
 - name: Install packages
@@ -41,35 +41,34 @@
 - name: Create oracle user
   user:
     name: oracle
-    uid: 10
-    group: oinstall
+    uid: "{{oracle_uid}}"
+    # TODO: figure out how this is supposed to get mounted under /home
+    home: /opt/apps/users/oracle
     generate_ssh_key: yes
 
 - name: Create grid user
   user:
     name: grid
-    uid: 61001
-    group: oinstall
+    uid: "{{grid_uid}}"
+    home: /opt/apps/users/grid
     generate_ssh_key: yes
 
 - name: Install horcm on node 1
-  pkg5:
-    name:
-      - horcm
-  when: "{{inventory_hostname}}" == ~.*(1$)
+  pkg5: name=horcm
+  when: inventory_hostname | match(".*1-mgmt$")
 
-- name: Copy scripts
-  unarchive:
-    src: scripts.tar
-    dest: /tmp
-
-- name: Setup ASM disks
-  command: /tmp/scripts/ovm_rac_dsk_cfg_12c.sh
-
-- name: Setup network
-  command: /tmp/scripts/ovm_rac_net_cfg.sh "{{inventory_hostname}}"
-
-- name: Setup horcm
-  command: /tmp/scripts/horcm_setup.sh "{{horcm}}"
+#- name: Copy scripts
+#  unarchive:
+#    src: scripts.tar
+#    dest: /tmp
+#
+#- name: Setup ASM disks
+#  command: /tmp/scripts/ovm_rac_dsk_cfg_12c.sh
+#
+#- name: Setup network
+#  command: /tmp/scripts/ovm_rac_net_cfg.sh "{{inventory_hostname}}"
+#
+#- name: Setup horcm
+#  command: /tmp/scripts/horcm_setup.sh "{{horcm}}"
 
 # vim: tabstop=2 shiftwidth=2
