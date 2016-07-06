@@ -10,7 +10,6 @@
       types: [ "repos" ]
     tags:
       - repos
-
   - name: Remove IP-based Solaris repo
     pkg5_publisher:
       name: solaris
@@ -18,7 +17,6 @@
     when: current_solaris_repo != solaris_repo
     tags:
       - repos
-
   - name: Add name-based Solaris repo
     pkg5_publisher:
       name: solaris
@@ -27,7 +25,6 @@
     when: current_solaris_repo != solaris_repo
     tags:
       - repos
-
   - name: Add site repo
     pkg5_publisher:
       name: site
@@ -36,7 +33,6 @@
     when: current_site_repo != site_repo
     tags:
       - repos
-
   - name: Install extra packages
     pkg5:
       name:
@@ -45,41 +41,35 @@
         - vim
     tags:
       - pkgs
-
   - name: Install horcm on node 1
     pkg5: name=horcm
     when: inventory_hostname | match(".*1-mgmt$")
     tags:
       - pkgs
-
   - name: Create oracle user
     lineinfile:
       dest: /etc/passwd
       line: "oracle:x:{{oracle_uid}}:{{oinstall_gid}}:{{inventory_hostname | regex_replace('-mgmt$', '')}}-oracle:/home/oracle:/usr/bin/bash"
     tags:
       - users
-
   - name: Create grid user
     lineinfile:
       dest: /etc/passwd
       line: "grid:x:{{grid_uid}}:{{oinstall_gid}}:{{inventory_hostname | regex_replace('-mgmt$', '')}}-grid:/home/grid:/usr/bin/bash"
     tags:
       - users
-
   - name: Create oracle ZFS homedir
     zfs:
       state: present
       name: "{{zfs_homedir_path}}/oracle"
     tags:
       - users
-
   - name: Create grid ZFS homedir
     zfs:
       state: present
       name: "{{zfs_homedir_path}}/grid"
     tags:
       - users
-
   - name: Set ownership on oracle homedir
     file:
       path: "{{homedir_path}}/oracle"
@@ -87,7 +77,6 @@
       group: oinstall
     tags:
       - users
-
   - name: Set ownership on grid homedir
     file:
       path: "{{homedir_path}}/grid"
@@ -95,27 +84,23 @@
       group: oinstall
     tags:
       - users
-
   - name: Create local SSH tmpdir
     local_action: file state=directory path="{{ssh_tmpdir}}" mode=0700
     become: False
     tags:
       - ssh
-
   - name: Create local oracle SSH keypair
     local_action: "command /usr/bin/ssh-keygen -t dsa -C 'oracle@{{ssh_key_basename}}' -N '' -f {{ssh_tmpdir}}/{{ssh_key_basename}}-oracle creates={{ssh_tmpdir}}/{{ssh_key_basename}}-oracle"
     when: inventory_hostname | match(".*1-mgmt$")
     become: False
     tags:
       - ssh
-
   - name: Create local grid SSH keypair
     local_action: "command /usr/bin/ssh-keygen -t dsa -C 'grid@{{ssh_key_basename}}' -N '' -f {{ssh_tmpdir}}/{{ssh_key_basename}}-grid creates={{ssh_tmpdir}}/{{ssh_key_basename}}-grid"
     when: inventory_hostname | match(".*1-mgmt$")
     become: False
     tags:
       - ssh
-    
   - name: Create oracle SSH dir
     file:
       state: directory
@@ -125,7 +110,6 @@
       mode: 0700
     tags:
       - ssh
-    
   - name: Create grid SSH dir
     file:
       state: directory
@@ -135,7 +119,6 @@
       mode: 0700
     tags:
       - ssh
-
   - name: Copy oracle private key into place
     copy:
       src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-oracle"
@@ -145,7 +128,6 @@
       group: oinstall
     tags:
       - ssh
-
   - name: Copy oracle public key into place
     copy:
       src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-oracle.pub"
@@ -155,7 +137,6 @@
       group: oinstall
     tags:
       - ssh
-
   - name: Copy oracle public key into auth keys
     copy:
       src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-oracle.pub"
@@ -165,7 +146,6 @@
       group: oinstall
     tags:
       - ssh
-
   - name: Copy grid private key into place
     copy:
       src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-grid"
@@ -175,7 +155,6 @@
       group: oinstall
     tags:
       - ssh
-
   - name: Copy grid public key into place
     copy:
       src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-grid.pub"
@@ -185,7 +164,6 @@
       group: oinstall
     tags:
       - ssh
-
   - name: Copy grid public key into auth keys
     copy:
       src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-grid.pub"
@@ -195,22 +173,18 @@
       group: oinstall
     tags:
       - ssh
-
   - name: Setup GRID disks
     grid_disk:
     tags:
       - disk
-  
   - name: Change hostname identity property
     command: "/usr/sbin/svccfg -s identity:node setprop config/nodename = astring: {{inventory_hostname | regex_replace('-mgmt$', '')}}"
     tags:
       - net
-
   - name: Refresh identity service
     command: "/usr/sbin/svcadm refresh identity:node"
     tags:
       - net
-
   - name: Setup network
     rac_net:
     tags:
@@ -227,7 +201,6 @@
       line: "{{salt_master_ip}}	salt"
     tags:
       - salt
-
   - name: Enable Salt minion
     service:
       name: salt-minion
