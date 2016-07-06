@@ -1,16 +1,12 @@
 # Used during domain setup and install
 #
 
-# domain-specific
-# state:
-# - active: domain will be booted and installed
-# - deleted: domain will be shut down and removed (all other vars are ignored)
-state: active
+# domain-specific (mgmt IP will need to change per run)
 cores: "1"
-memory: "8"
-mgmt_ip: "130.164.28.88"
+memory: "4"
+ldom_mgmt_ip: "130.164.28.116"
 rac_dbvers: "12.2.1.3"
-rac_envs: [ "AITEST_ENV" ]
+rac_storage: [ "AUTOBLD_ENV_DATA", "AUTOBLD_ENV_FRA", "AUTOBLD_ENV_OCR" ]
 vnets: [ { "vnet": "mgmt0", "vswitch": "primary-vsw0", "id": "0", "pvid": "1" },
          { "vnet": "pubnet0", "vswitch": "primary-vsw1", "id": "1", "pvid": "1322" },
          { "vnet": "pubnet1", "vswitch": "primary-vsw1", "id": "2", "pvid": "1322" },

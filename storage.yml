@@ -1,39 +1,20 @@
 ---
-  - name: Setup OS storage for domain {{ldom_name}}
+- hosts: storage
+
+  tasks:
+  - name: Setup {{ldom_name}} OS storage
     ldevblock:
-      name: "{{ldom_name}}_OS"
       horcm: "{{horcm}}"
-      hosts: "{{os_chassis}}"
       pool: "{{os_pool}}"
-      begin: "{{os_begin}}"
-      end: "{{os_end}}"
-      size: "{{os_size}}"
-  - name: Setup {{env_name}}_DATA storage
+      chassis: "{{os_chassis}}"
+      ports: "{{os_ports}}"
+      blocks: "{{os_blocks}}"
+  - name: Setup RAC env storage
     ldevblock:
-      name: "{{env_name}}_DATA"
       horcm: "{{horcm}}"
       pool: "{{env_pool}}"
-      hosts: "{{env_chassis}}"
-      begin: "{{env_data_begin}}"
-      end: "{{env_data_end}}"
-      size: "{{env_data_size}}"
-  - name: Setup {{env_name}}_FRA storage
-    ldevblock:
-      name: "{{env_name}}_FRA"
-      horcm: "{{horcm}}"
-      pool: "{{env_pool}}"
-      hosts: "{{env_chassis}}"
-      begin: "{{env_fra_begin}}"
-      end: "{{env_fra_end}}"
-      size: "{{env_fra_size}}"
-  - name: Setup {{env_name}}_OCR storage
-    ldevblock:
-      name: "{{env_name}}_OCR"
-      horcm: "{{horcm}}"
-      pool: "{{env_pool}}"
-      hosts: "{{env_chassis}}"
-      begin: "{{env_ocr_begin}}"
-      end: "{{env_ocr_end}}"
-      size: "{{env_ocr_size}}"
+      chassis: "{{env_chassis}}"
+      ports: "{{env_ports}}"
+      blocks: "{{env_blocks}}"
 
 # vim: tabstop=2 shiftwidth=2

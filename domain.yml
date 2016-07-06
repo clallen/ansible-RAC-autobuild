@@ -1,74 +1,238 @@
 ---
-- name: Remove IP-based Solaris repo
-  pkg5_publisher:
-    name: solaris
-    state: absent
+- hosts: domain
 
-- name: Add name-based Solaris repo
-  pkg5_publisher:
-    name: solaris
-    origin: "{{solaris_repo}}"
-    sticky: true
+  vars:
+    ssh_tmpdir: "{{lookup('env','HOME')}}/autobuild_ssh"
 
-- name: Add site repo
-  pkg5_publisher:
-    name: site
-    origin: "{{site_repo}}"
-    sticky: true
+  tasks:
+  - name: Gather repo facts
+    site_facts:
+      types: [ "repos" ]
+    tags:
+      - repos
 
-- name: Install packages
-  pkg5:
-    name:
+  - name: Remove IP-based Solaris repo
+    pkg5_publisher:
+      name: solaris
+      state: absent
+    when: current_solaris_repo != solaris_repo
+    tags:
+      - repos
+
+  - name: Add name-based Solaris repo
+    pkg5_publisher:
+      name: solaris
+      origin: "{{solaris_repo}}"
+      sticky: true
+    when: current_solaris_repo != solaris_repo
+    tags:
+      - repos
+
+  - name: Add site repo
+    pkg5_publisher:
+      name: site
+      origin: "{{site_repo}}"
+      sticky: true
+    when: current_site_repo != site_repo
+    tags:
+      - repos
+
+  - name: Install extra packages
+    pkg5:
+      name:
+        - salt
+        - ucb
+        - vim
+    tags:
+      - pkgs
+
+  - name: Install horcm on node 1
+    pkg5: name=horcm
+    when: inventory_hostname | match(".*1-mgmt$")
+    tags:
+      - pkgs
+
+  - name: Create oracle user
+    lineinfile:
+      dest: /etc/passwd
+      line: "oracle:x:{{oracle_uid}}:{{oinstall_gid}}:{{inventory_hostname | regex_replace('-mgmt$', '')}}-oracle:/home/oracle:/usr/bin/bash"
+    tags:
+      - users
+
+  - name: Create grid user
+    lineinfile:
+      dest: /etc/passwd
+      line: "grid:x:{{grid_uid}}:{{oinstall_gid}}:{{inventory_hostname | regex_replace('-mgmt$', '')}}-grid:/home/grid:/usr/bin/bash"
+    tags:
+      - users
+
+  - name: Create oracle ZFS homedir
+    zfs:
+      state: present
+      name: "{{zfs_homedir_path}}/oracle"
+    tags:
+      - users
+
+  - name: Create grid ZFS homedir
+    zfs:
+      state: present
+      name: "{{zfs_homedir_path}}/grid"
+    tags:
+      - users
+
+  - name: Set ownership on oracle homedir
+    file:
+      path: "{{homedir_path}}/oracle"
+      owner: oracle
+      group: oinstall
+    tags:
+      - users
+
+  - name: Set ownership on grid homedir
+    file:
+      path: "{{homedir_path}}/grid"
+      owner: grid
+      group: oinstall
+    tags:
+      - users
+
+  - name: Create local SSH tmpdir
+    local_action: file state=directory path="{{ssh_tmpdir}}" mode=0700
+    become: False
+    tags:
+      - ssh
+
+  - name: Create local oracle SSH keypair
+    local_action: "command /usr/bin/ssh-keygen -t dsa -C 'oracle@{{ssh_key_basename}}' -N '' -f {{ssh_tmpdir}}/{{ssh_key_basename}}-oracle creates={{ssh_tmpdir}}/{{ssh_key_basename}}-oracle"
+    when: inventory_hostname | match(".*1-mgmt$")
+    become: False
+    tags:
+      - ssh
+
+  - name: Create local grid SSH keypair
+    local_action: "command /usr/bin/ssh-keygen -t dsa -C 'grid@{{ssh_key_basename}}' -N '' -f {{ssh_tmpdir}}/{{ssh_key_basename}}-grid creates={{ssh_tmpdir}}/{{ssh_key_basename}}-grid"
+    when: inventory_hostname | match(".*1-mgmt$")
+    become: False
+    tags:
+      - ssh
+    
+  - name: Create oracle SSH dir
+    file:
+      state: directory
+      path: "{{homedir_path}}/oracle/.ssh"
+      owner: oracle
+      group: oinstall
+      mode: 0700
+    tags:
+      - ssh
+    
+  - name: Create grid SSH dir
+    file:
+      state: directory
+      path: "{{homedir_path}}/grid/.ssh"
+      owner: grid
+      group: oinstall
+      mode: 0700
+    tags:
+      - ssh
+
+  - name: Copy oracle private key into place
+    copy:
+      src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-oracle"
+      dest: "{{homedir_path}}/oracle/.ssh/id_dsa"
+      mode: 0600
+      owner: oracle
+      group: oinstall
+    tags:
+      - ssh
+
+  - name: Copy oracle public key into place
+    copy:
+      src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-oracle.pub"
+      dest: "{{homedir_path}}/oracle/.ssh/id_dsa.pub"
+      mode: 0644
+      owner: oracle
+      group: oinstall
+    tags:
+      - ssh
+
+  - name: Copy oracle public key into auth keys
+    copy:
+      src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-oracle.pub"
+      dest: "{{homedir_path}}/oracle/.ssh/authorized_keys"
+      mode: 0644
+      owner: oracle
+      group: oinstall
+    tags:
+      - ssh
+
+  - name: Copy grid private key into place
+    copy:
+      src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-grid"
+      dest: "{{homedir_path}}/grid/.ssh/id_dsa"
+      mode: 0600
+      owner: grid
+      group: oinstall
+    tags:
+      - ssh
+
+  - name: Copy grid public key into place
+    copy:
+      src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-grid.pub"
+      dest: "{{homedir_path}}/grid/.ssh/id_dsa.pub"
+      mode: 0644
+      owner: grid
+      group: oinstall
+    tags:
+      - ssh
+
+  - name: Copy grid public key into auth keys
+    copy:
+      src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-grid.pub"
+      dest: "{{homedir_path}}/grid/.ssh/authorized_keys"
+      mode: 0644
+      owner: grid
+      group: oinstall
+    tags:
+      - ssh
+
+  - name: Setup GRID disks
+    grid_disk:
+    tags:
+      - disk
+  
+  - name: Change hostname identity property
+    command: "/usr/sbin/svccfg -s identity:node setprop config/nodename = astring: {{inventory_hostname | regex_replace('-mgmt$', '')}}"
+    tags:
+      - net
+
+  - name: Refresh identity service
+    command: "/usr/sbin/svcadm refresh identity:node"
+    tags:
+      - net
+
+  - name: Setup network
+    rac_net:
+    tags:
+      - net
+
+    #TODO: fix /etc/hosts
+  
+  #- name: Setup horcm
+  #  command: /tmp/scripts/horcm_setup.sh "{{horcm}}"
+
+  - name: Add Salt master to /etc/hosts
+    lineinfile:
+      dest: /etc/hosts
+      line: "{{salt_master_ip}}	salt"
+    tags:
       - salt
-      - ucb
-      - vim
 
-- name: Add Salt master to /etc/hosts
-  lineinfile:
-    dest: /etc/hosts
-    line: "{{salt_master_ip}}	salt"
-
-- name: Enable Salt minion
-  service:
-    name: salt-minion
-    enabled: yes
-
-- name: Import manifests
-  service:
-    name: manifest-import
-    state: restarted
-
-- name: Create oracle user
-  user:
-    name: oracle
-    uid: "{{oracle_uid}}"
-    # TODO: figure out how this is supposed to get mounted under /home
-    home: /opt/apps/users/oracle
-    generate_ssh_key: yes
-
-- name: Create grid user
-  user:
-    name: grid
-    uid: "{{grid_uid}}"
-    home: /opt/apps/users/grid
-    generate_ssh_key: yes
-
-- name: Install horcm on node 1
-  pkg5: name=horcm
-  when: inventory_hostname | match(".*1-mgmt$")
-
-#- name: Copy scripts
-#  unarchive:
-#    src: scripts.tar
-#    dest: /tmp
-#
-#- name: Setup ASM disks
-#  command: /tmp/scripts/ovm_rac_dsk_cfg_12c.sh
-#
-#- name: Setup network
-#  command: /tmp/scripts/ovm_rac_net_cfg.sh "{{inventory_hostname}}"
-#
-#- name: Setup horcm
-#  command: /tmp/scripts/horcm_setup.sh "{{horcm}}"
+  - name: Enable Salt minion
+    service:
+      name: salt-minion
+      enabled: yes
+    tags:
+      - salt
 
 # vim: tabstop=2 shiftwidth=2

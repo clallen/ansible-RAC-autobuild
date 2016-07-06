@@ -1,18 +1,21 @@
 ---
+- hosts: chassis
+
+  tasks:
   - name: Setup domain {{ldom_name}} on {{inventory_hostname}}
     solaris_ldom:
-      state: "{{state}}"
+      state: active
       name: "{{ldom_name}}"
       cores: "{{cores}}"
       memory: "{{memory}}"
       domain_vars:
         {
-        "network-boot-arguments": "host-ip={{mgmt_ip}},router-ip={{mgmt_gw}},subnet-mask={{mgmt_nm}},hostname={{ldom_name}}-mgmt,file=http://{{ai_server_ip}}:5555/cgi-bin/wanboot-cgi",
+        "network-boot-arguments": "host-ip={{ldom_mgmt_ip}},router-ip={{mgmt_gw}},subnet-mask={{mgmt_nm}},hostname={{ldom_name}}-mgmt,file=http://{{ai_server_ip}}:5555/cgi-bin/wanboot-cgi",
         "boot-device": "net",
         "boot-file": "- install"
         }
       rac_dbvers: "{{rac_dbvers}}"
-      rac_envs: "{{rac_envs}}"
+      rac_storage: "{{rac_storage}}"
       vnets: "{{vnets}}"
   - name: Give domain time to boot
     wait_for: timeout=10
