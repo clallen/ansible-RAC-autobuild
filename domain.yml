@@ -227,7 +227,7 @@
   
     # horcm
   #- name: Setup horcm
-  #  command: /tmp/scripts/horcm_setup.sh "{{horcm}}"
+  #  command: /tmp/scripts/horcm_setup.sh "{{horcminst}}"
 
     # salt
   - name: Add Salt master to /etc/hosts

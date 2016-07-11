@@ -3,7 +3,7 @@
 import platform, subprocess, sys, re
 sys.path.append("/home/clallen/solaris_venv/lib/python2.7/site-packages")
 sys.path.append("/home/clallen/work/autobuild/ansible_modules")
-import agent.lib.ldoms.ldmxml
+from agent.lib.ldoms.ldmxml import *
 from ldevblock import LDEVBlock
 
 DOCUMENTATION = """
@@ -208,7 +208,7 @@ class LDOM:
         self.changed = False
         self.msg = []
 
-        self.lxc = agent.lib.ldoms.ldmxml.LDMXMLConnection()
+        self.lxc = LDMXMLConnection()
 
         self.node_id = self.name[-1]
         # VDS used for each node is one less than its ID
@@ -222,9 +222,9 @@ class LDOM:
         if not self.module.check_mode:
             try:
                 self.lxc.create(self.name, cpu_arch=self.cpu_arch)
-            except Exception as e:
+            except LDMError as e:
                 self.module.fail_json(msg = "Unable to create domain:"+
-                                      ", ".join(e.get_messages()))
+                                      str(e))
             else:
                 self.changed = True
         self.msg.append("Domain created")
@@ -237,9 +237,9 @@ class LDOM:
                 self.state_inactive()
             try:
                 self.lxc.destroy(self.name)
-            except Exception as e:
+            except LDMError as e:
                 self.module.fail_json(msg = "Unable to delete domain:"+
-                                      ", ".join(e.get_messages()))
+                                      str(e))
             else:
                 self.changed = True
         self.msg.append("Domain deleted")
@@ -248,9 +248,8 @@ class LDOM:
         if not self.module.check_mode:
             try:
                 self.lxc.set_core(self.name, self.cores)
-            except Exception as e:
-                self.msg.append("Unable to set cores:")
-                self.msg.append(", ".join(e.get_messages()))
+            except LDMError as e:
+                self.msg.append("Unable to set cores: "+str(e))
                 return
             else:
                 self.changed = True
@@ -260,9 +259,8 @@ class LDOM:
         if not self.module.check_mode:
             try:
                 self.lxc.set_memory(self.name, self.memory*1024*1024*1024)
-            except Exception as e:
-                self.msg.append("Unable to set memory:")
-                self.msg.append(", ".join(e.get_messages()))
+            except LDMError as e:
+                self.msg.append("Unable to set memory: "+str(e))
                 return
             else:
                 self.changed = True
@@ -272,9 +270,8 @@ class LDOM:
         if not self.module.check_mode:
             try:
                 self.lxc.update_variables(self.name, self.domain_vars)
-            except Exception as e:
-                self.msg.append("Unable to set domain variables:")
-                self.msg.append(", ".join(e.get_messages()))
+            except LDMError as e:
+                self.msg.append("Unable to set domain variables: "+str(e))
                 return
             else:
                 self.changed = True
@@ -307,22 +304,22 @@ class LDOM:
                 self.msg.append("COULD NOT ADD VDISK - ID REQUIRED")
                 failed = True
                 break
+            if vdisk["mpgroup"] is None:
+                self.msg.append("COULD NOT ADD VDISK - MPGROUP REQUIRED")
+                failed = True
+                break
             if not self.module.check_mode:
                 try:
-                    if vdisk["mpgroup"] is not None and not self._volume_exists(vdisk["volume"]):
+                    if not self._volume_exists(vdisk["volume"]):
                         self.lxc.add_vdsdev(vdisk["vds"], vdisk["volume"],
                                             vdisk["backend"],
                                             mpgroup=vdisk["mpgroup"],
                                             shared=True)
-                        if not re.match(r"^secondary", vdisk["vds"]):
-                            self.lxc.add_vdisk(self.name, vdisk["vdisk"], vdisk["vds"],
-                                               volume=vdisk["volume"], id=vdisk["id"])
-                    else:
+                    if not re.match(r"^secondary", vdisk["vds"]):
                         self.lxc.add_vdisk(self.name, vdisk["vdisk"], vdisk["vds"],
-                                           backend=vdisk["backend"],
                                            volume=vdisk["volume"], id=vdisk["id"])
-                except Exception as e:
-                    self.module.fail_json(msg = ", ".join(e.get_messages()))
+                except LDMError as e:
+                    self.module.fail_json(msg = str(e))
                 else:
                     self.changed = True
         if not failed:
@@ -352,9 +349,8 @@ class LDOM:
                 try:
                     self.lxc.add_vnet(self.name, vnet["vnet"], vnet["vswitch"],
                                       pvid = vnet["pvid"], id = vnet["id"])
-                except Exception as e:
-                    self.msg.append("Unable to set vnets: "+
-                                    ", ".join(e.get_messages()))
+                except LDMError as e:
+                    self.msg.append("Unable to set vnets: "+str(e))
                     return
                 else:
                     self.changed = True
@@ -486,10 +482,10 @@ class LDOM:
         if self.exists():
             try:
                 ldmcfg = self.lxc.list(self.name)
-            except Exception as e:
+            except LDMError as e:
                 self.msg.append()
                 self.module.fail_json(msg = "Unable to get domain status: "+
-                                      ", ".join(e.get_messages()))
+                                      str(e))
             ldom_info = ldmcfg["ldom_info"]
             return ldom_info["state"]
         else:
@@ -501,9 +497,9 @@ class LDOM:
                 if self.is_inactive():
                     self.lxc.bind(self.name)
                 self.lxc.start(self.name)
-            except Exception as e:
+            except LDMError as e:
                 self.module.fail_json(msg = "Unable to activate domain: "+
-                                      ", ".join(e.get_messages()))
+                                      str(e))
             self.changed = True
             self.msg.append("Domain active")
 
@@ -514,9 +510,9 @@ class LDOM:
                     self.lxc.stop(self.name)
                 else:
                     self.lxc.bind(self.name)
-            except Exception as e:
+            except LDMError as e:
                 self.module.fail_json(msg = "Unable to bind domain: "+
-                                      ", ".join(e.get_messages()))
+                                      str(e))
             self.changed = True
             self.msg.append("Domain bound")
 
@@ -526,14 +522,14 @@ class LDOM:
                 if self.is_active():
                     self.lxc.stop(self.name)
                 self.lxc.unbind(self.name)
-            except Exception as e:
+            except LDMError as e:
                 self.msg.append()
                 self.module.fail_json(msg = "Unable to deactivate domain: "+
-                                      ", ".join(e.get_messages()))
+                                      str(e))
             self.changed = True
             self.msg.append("Domain inactive")
 
-    def _volume_exists(volname):
+    def _volume_exists(self, volname):
         services = self.lxc.list_services("primary")
         for vdsname in services["vds"].iterkeys():
             vds = services["vds"][vdsname]

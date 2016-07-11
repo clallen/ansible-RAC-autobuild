@@ -1,5 +1,5 @@
 # Used in all groups
 #
 
-horcm: "6"
+horcminst: "6"
 ldom_name: "autobld1"

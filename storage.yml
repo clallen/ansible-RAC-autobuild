@@ -4,14 +4,14 @@
   tasks:
   - name: Setup {{ldom_name}} OS storage
     ldevblock:
-      horcm: "{{horcm}}"
+      horcm: "{{horcminst}}"
       chassis: "{{os_chassis}}"
       blocks: "{{os_blocks}}"
     tags:
       - os
   - name: Setup RAC env storage
     ldevblock:
-      horcm: "{{horcm}}"
+      horcm: "{{horcminst}}"
       chassis: "{{env_chassis}}"
       blocks: "{{env_blocks}}"
     tags:

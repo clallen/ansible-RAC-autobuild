@@ -7,6 +7,8 @@
              { "vnet": "pubnet1", "vswitch": "primary-vsw1", "id": "2", "pvid": "1322" },
              { "vnet": "privnet0", "vswitch": "primary-vsw2", "id": "3", "pvid": "913" },
              { "vnet": "privnet1", "vswitch": "primary-vsw2", "id": "4", "pvid": "913" } ]
+    mgmt_hostname: "{{ldom_name}}-mgmt"
+    mgmt_ip: "{{lookup('dig', mgmt_hostname)}}"
     mgmt_gw: 130.164.28.1
     mgmt_nm: 255.255.255.0
 
@@ -19,7 +21,7 @@
       memory: "{{memory}}"
       domain_vars:
         {
-        "network-boot-arguments": "host-ip={{ldom_mgmt_ip}},router-ip={{mgmt_gw}},subnet-mask={{mgmt_nm}},hostname={{ldom_name}}-mgmt,file=http://{{ai_server_ip}}:5555/cgi-bin/wanboot-cgi",
+        "network-boot-arguments": "host-ip={{mgmt_ip}},router-ip={{mgmt_gw}},subnet-mask={{mgmt_nm}},hostname={{mgmt_hostname}},file=http://{{ai_server_ip}}:5555/cgi-bin/wanboot-cgi",
         "boot-device": "net",
         "boot-file": "- install"
         }

@@ -4,7 +4,6 @@
 # domain-specific (mgmt IP will need to change per run)
 cores: "1"
 memory: "4"
-ldom_mgmt_ip: "130.164.28.88"
 rac_dbvers: "12.2.1.3"
 rac_storage: [ "AUTOBLD_ENV_DATA", "AUTOBLD_ENV_FRA", "AUTOBLD_ENV_OCR" ]
 
