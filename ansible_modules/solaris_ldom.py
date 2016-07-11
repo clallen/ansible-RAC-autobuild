@@ -310,11 +310,10 @@ class LDOM:
                 break
             if not self.module.check_mode:
                 try:
-                    if not self._volume_exists(vdisk["volume"]):
-                        self.lxc.add_vdsdev(vdisk["vds"], vdisk["volume"],
-                                            vdisk["backend"],
-                                            mpgroup=vdisk["mpgroup"],
-                                            shared=True)
+                    self.lxc.add_vdsdev(vdisk["vds"], vdisk["volume"],
+                                        vdisk["backend"],
+                                        mpgroup=vdisk["mpgroup"],
+                                        shared=True)
                     if not re.match(r"^secondary", vdisk["vds"]):
                         self.lxc.add_vdisk(self.name, vdisk["vdisk"], vdisk["vds"],
                                            volume=vdisk["volume"], id=vdisk["id"])
@@ -528,19 +527,6 @@ class LDOM:
                                       str(e))
             self.changed = True
             self.msg.append("Domain inactive")
-
-    def _volume_exists(self, volname):
-        services = self.lxc.list_services("primary")
-        for vdsname in services["vds"].iterkeys():
-            vds = services["vds"][vdsname]
-            for binding_name in vds:
-                binding_list = vds[binding_name]
-                for binding in binding_list:
-                    if len(binding) > 1:
-                        volume = binding["vol_name"]
-                        if re.match(volname, volume):
-                            return True
-        return False
 
 def main():
     module = AnsibleModule(
