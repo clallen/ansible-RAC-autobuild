@@ -13,7 +13,7 @@ def main():
         argument_spec = dict(
             types = dict(required = True, type = "list")
         ),
-        supports_check_mode = True
+        supports_check_mode = False
     )
 
     data = { "ansible_facts": {} }

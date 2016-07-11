@@ -7,8 +7,5 @@ salt_master_ip: 130.164.51.133
 oracle_uid: 10
 grid_uid: 61001
 oinstall_gid: 111
-zfs_homedir_path: rpool/apps/users
-homedir_path: /opt/apps/users
-ssh_key_basename: "{{inventory_hostname | regex_replace('\\d?-mgmt$', '')}}"
 #pad_class: pre-release
 #pad_owner: unix_admins

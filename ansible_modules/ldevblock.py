@@ -23,24 +23,12 @@ options:
         type: C{str}
         description:
             - HORCM instance to use.
-    pool:
-        required: true
-        type: C{str}
-        description:
-            - Storage pool in which the block will be created.  Only required
-              for create.
     chassis:
         required: true
         type: C{list}
         description:
             - Hosts to which the block will be shared.  Only required for
               create.
-    ports:
-        required: true
-        type: C{list}
-        description:
-            - Optional list of ports to share through.  If not specified all
-              ports will be used (CL1-B, CL2-B, CL7-F, CL8-F).
     blocks:
         required: true
         type: C{list} of C{dict}
@@ -55,34 +43,21 @@ options:
               LDEV (e.g. "15:60").
             - end: Ending index of the block.  This is the index of the last
               LDEV (e.g. "15:6F").
-"""
-
-EXAMPLES = """
-# Create a block of 8 1TB LDEVs and share them to homer and blinky through
-# specific ports
-ldevblock:
-    name: BIGDUMBDISKGROUP
-    horcm: "5"
-    pool: "15"
-    size: "1024"
-    begin: "15:68"
-    end: "15:6f"
-    chassis: [ "homer", "blinky" ]
-    ports: [ "CL1-B", "CL2-B" ]
+            - ports: List of ports to share through (e.g. CL1-B, CL2-B, CL7-F, CL8-F).
+            - pool: Storage pool in which the block will be created.
 """
 
 
 class LDEVBlock:
     RAIDCOM = "/HORCM/usr/bin/raidcom"
-    ALL_PORTS = [ "CL1-B", "CL2-B", "CL7-F", "CL8-F" ]
     TIERED = [ 15, 16 ]
 
-    def __init__(self, module, name, begin, end, size):
+    def __init__(self, module, name, begin, end, size, ports, pool):
         self.module = module
         self.horcm = self.module.params["horcm"]
-        self.pool = self.module.params["pool"]
         self.chassis = self.module.params["chassis"]
-        self.ports = self.module.params["ports"]
+        self.pool = pool
+        self.ports = ports
         self.name = name
         self.size = size
         self.begin = begin
@@ -148,11 +123,7 @@ class LDEVBlock:
             if len(self._get_shared_hosts(ldev_id)) != 0:
                 self.msg.append("LDEV "+ldev_id+" is already shared, skipping")
                 continue
-            if self.ports is not None:
-                portlist = self.ports
-            else:
-                portlist = self.ALL_PORTS
-            for port in portlist:
+            for port in self.ports:
                 for chassis in self.chassis:
                     cmd_list.append("add lun -port "+port+" "+chassis+"-pri -ldev_id "+
                                     ldev_id+" -I"+self.horcm)
@@ -246,9 +217,7 @@ def main():
     module = AnsibleModule(
         argument_spec = dict(
             horcm = dict(required = True, type = "str"),
-            pool = dict(type = "str"),
             chassis = dict(type = "list"),
-            ports = dict(type = "list"),
             blocks = dict(type = "list")
         ),
         supports_check_mode = True
@@ -262,7 +231,7 @@ def main():
 
     for block in module.params["blocks"]:
         ldb = LDEVBlock(module, block["name"], block["begin"], block["end"],
-                        block["size"])
+                        block["size"], block["ports"], block["pool"])
         ldb.create()
         ldb.share()
 
@@ -273,5 +242,3 @@ from ansible.module_utils.basic import *
 
 if __name__ == "__main__":
     main()
-
-# vim: textwidth=80 formatoptions=cqt wrapmargin=0

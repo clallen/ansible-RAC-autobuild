@@ -11,17 +11,21 @@ def main():
     changed = False
     msg = []
 
+    if module.check_mode:
+        self.msg.append('RUNNING IN CHECK MODE - NO CHANGES WILL BE MADE')
+
+    devnull_fd = open(os.devnull, 'w')
     for index in range(10, 98):
         device = "/dev/rdsk/c1d"+str(index)+"s2"
         if not os.path.exists(device):
             continue
         msg.append("Checking disk "+device)
         # label disk
-        code = subprocess.call(["/usr/sbin/prtvtoc", device])
+        code = subprocess.call(["/usr/sbin/prtvtoc", device], stdout = devnull_fd)
         if code != 0:
             msg.append("Labelling disk")
             if not module.check_mode:
-                subprocess.call(["/usr/sbin/format", "-L", "vtoc", "-d", os.path.basename(device)[:-2]])
+                subprocess.call(["/usr/sbin/format", "-L", "vtoc", "-d", os.path.basename(device)[:-2]], stdout = devnull_fd)
                 changed = True
         # create whole disk partition table
         linecount = subprocess.check_output("/usr/sbin/prtvtoc "+device+" | /usr/bin/grep -v ^* | wc -l", shell = True)
@@ -29,7 +33,8 @@ def main():
         if int(linecount) != 2:
             msg.append("Creating whole disk partition table")
             if not module.check_mode:
-                subprocess.call("/usr/sbin/prtvtoc "+device+" | gawk '"+GAWK_CODE+"' | /usr/sbin/fmthard -s - "+device, shell = True)
+                subprocess.call("/usr/sbin/prtvtoc "+device+" | gawk '"+GAWK_CODE+"' | /usr/sbin/fmthard -s - "+device,
+                                shell = True, stdout = devnull_fd)
                 changed = True
         # set owner/perms
         pdevice = device.replace("s2", "s0")
@@ -52,6 +57,7 @@ def main():
             if not module.check_mode:
                 os.chmod(pdevice, 0660)
                 changed = True
+    devnull_fd.close()
 
     module.exit_json(changed = changed, msg = " | ".join(msg))
 

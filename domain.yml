@@ -3,8 +3,13 @@
 
   vars:
     ssh_tmpdir: "{{lookup('env','HOME')}}/autobuild_ssh"
+    ssh_key_basename: "{{inventory_hostname | regex_replace('\\d?-mgmt$', '')}}"
+    zfs_home_fs: rpool/apps/users
+    domain: natinst.com
+    pub_hostname: "{{inventory_hostname | regex_replace('-mgmt$', '')}}"
 
   tasks:
+    # repos
   - name: Gather repo facts
     site_facts:
       types: [ "repos" ]
@@ -33,6 +38,8 @@
     when: current_site_repo != site_repo
     tags:
       - repos
+
+    # pkgs
   - name: Install extra packages
     pkg5:
       name:
@@ -46,44 +53,87 @@
     when: inventory_hostname | match(".*1-mgmt$")
     tags:
       - pkgs
+
+    # net
+  - name: Setup RAC networks
+    rac_net:
+    tags:
+      - net
+  - name: Change hostname identity property
+    command: "/usr/sbin/svccfg -s identity:node setprop config/nodename = astring: {{pub_hostname}}"
+    tags:
+      - net
+  - name: Refresh identity service
+    command: "/usr/sbin/svcadm refresh identity:node"
+    tags:
+      - net
+  - name: Add public IP to hosts file
+    lineinfile:
+      dest: /etc/inet/hosts
+      line: "{{lookup('dig', pub_hostname)}} {{pub_hostname}} {{pub_hostname}}.{{domain}}"
+    tags:
+      - net
+  - name: Lookup private IPs
+    set_fact:
+      priv_lookup: "{{lookup('dig', item | regex_replace('-mgmt$', '-priv1'))}} {{item | regex_replace('-mgmt$', '-priv1')}}"
+    with_items: "{{groups['domain']}}"
+    register: privip_result
+    tags:
+      - net
+  - name: Format private IPs
+    set_fact:
+      priv_ips: "{{ privip_result.results | map(attribute='ansible_facts.priv_lookup') | list }}"
+    tags:
+      - net
+  - name: Add private IPs to hosts file
+    lineinfile:
+      dest: /etc/inet/hosts
+      line: "{{item}}"
+    with_items: "{{priv_ips}}"
+    tags:
+      - net
+
+    # users
   - name: Create oracle user
     lineinfile:
       dest: /etc/passwd
-      line: "oracle:x:{{oracle_uid}}:{{oinstall_gid}}:{{inventory_hostname | regex_replace('-mgmt$', '')}}-oracle:/home/oracle:/usr/bin/bash"
+      line: "oracle:x:{{oracle_uid}}:{{oinstall_gid}}:{{pub_hostname}}-oracle:/home/oracle:/usr/bin/bash"
     tags:
       - users
   - name: Create grid user
     lineinfile:
       dest: /etc/passwd
-      line: "grid:x:{{grid_uid}}:{{oinstall_gid}}:{{inventory_hostname | regex_replace('-mgmt$', '')}}-grid:/home/grid:/usr/bin/bash"
+      line: "grid:x:{{grid_uid}}:{{oinstall_gid}}:{{pub_hostname}}-grid:/home/grid:/usr/bin/bash"
     tags:
       - users
   - name: Create oracle ZFS homedir
     zfs:
       state: present
-      name: "{{zfs_homedir_path}}/oracle"
+      name: "{{zfs_home_fs}}/oracle"
     tags:
       - users
   - name: Create grid ZFS homedir
     zfs:
       state: present
-      name: "{{zfs_homedir_path}}/grid"
+      name: "{{zfs_home_fs}}/grid"
     tags:
       - users
   - name: Set ownership on oracle homedir
     file:
-      path: "{{homedir_path}}/oracle"
+      path: "/home/oracle"
       owner: oracle
       group: oinstall
     tags:
       - users
   - name: Set ownership on grid homedir
     file:
-      path: "{{homedir_path}}/grid"
+      path: "/home/grid"
       owner: grid
       group: oinstall
     tags:
       - users
+
+    # ssh
   - name: Create local SSH tmpdir
     local_action: file state=directory path="{{ssh_tmpdir}}" mode=0700
     become: False
@@ -104,7 +154,7 @@
   - name: Create oracle SSH dir
     file:
       state: directory
-      path: "{{homedir_path}}/oracle/.ssh"
+      path: "/home/oracle/.ssh"
       owner: oracle
       group: oinstall
       mode: 0700
@@ -113,7 +163,7 @@
   - name: Create grid SSH dir
     file:
       state: directory
-      path: "{{homedir_path}}/grid/.ssh"
+      path: "/home/grid/.ssh"
       owner: grid
       group: oinstall
       mode: 0700
@@ -122,7 +172,7 @@
   - name: Copy oracle private key into place
     copy:
       src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-oracle"
-      dest: "{{homedir_path}}/oracle/.ssh/id_dsa"
+      dest: "/home/oracle/.ssh/id_dsa"
       mode: 0600
       owner: oracle
       group: oinstall
@@ -131,7 +181,7 @@
   - name: Copy oracle public key into place
     copy:
       src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-oracle.pub"
-      dest: "{{homedir_path}}/oracle/.ssh/id_dsa.pub"
+      dest: "/home/oracle/.ssh/id_dsa.pub"
       mode: 0644
       owner: oracle
       group: oinstall
@@ -140,7 +190,7 @@
   - name: Copy oracle public key into auth keys
     copy:
       src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-oracle.pub"
-      dest: "{{homedir_path}}/oracle/.ssh/authorized_keys"
+      dest: "/home/oracle/.ssh/authorized_keys"
       mode: 0644
       owner: oracle
       group: oinstall
@@ -149,7 +199,7 @@
   - name: Copy grid private key into place
     copy:
       src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-grid"
-      dest: "{{homedir_path}}/grid/.ssh/id_dsa"
+      dest: "/home/grid/.ssh/id_dsa"
       mode: 0600
       owner: grid
       group: oinstall
@@ -158,7 +208,7 @@
   - name: Copy grid public key into place
     copy:
       src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-grid.pub"
-      dest: "{{homedir_path}}/grid/.ssh/id_dsa.pub"
+      dest: "/home/grid/.ssh/id_dsa.pub"
       mode: 0644
       owner: grid
       group: oinstall
@@ -167,34 +217,24 @@
   - name: Copy grid public key into auth keys
     copy:
       src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-grid.pub"
-      dest: "{{homedir_path}}/grid/.ssh/authorized_keys"
+      dest: "/home/grid/.ssh/authorized_keys"
       mode: 0644
       owner: grid
       group: oinstall
     tags:
       - ssh
+
+    # disk
   - name: Setup GRID disks
     grid_disk:
     tags:
       - disk
-  - name: Change hostname identity property
-    command: "/usr/sbin/svccfg -s identity:node setprop config/nodename = astring: {{inventory_hostname | regex_replace('-mgmt$', '')}}"
-    tags:
-      - net
-  - name: Refresh identity service
-    command: "/usr/sbin/svcadm refresh identity:node"
-    tags:
-      - net
-  - name: Setup network
-    rac_net:
-    tags:
-      - net
-
-    #TODO: fix /etc/hosts
   
+    # horcm
   #- name: Setup horcm
   #  command: /tmp/scripts/horcm_setup.sh "{{horcm}}"
 
+    # salt
   - name: Add Salt master to /etc/hosts
     lineinfile:
       dest: /etc/hosts

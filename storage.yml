@@ -5,16 +5,16 @@
   - name: Setup {{ldom_name}} OS storage
     ldevblock:
       horcm: "{{horcm}}"
-      pool: "{{os_pool}}"
       chassis: "{{os_chassis}}"
-      ports: "{{os_ports}}"
       blocks: "{{os_blocks}}"
+    tags:
+      - os
   - name: Setup RAC env storage
     ldevblock:
       horcm: "{{horcm}}"
-      pool: "{{env_pool}}"
       chassis: "{{env_chassis}}"
-      ports: "{{env_ports}}"
       blocks: "{{env_blocks}}"
+    tags:
+      - env
 
 # vim: tabstop=2 shiftwidth=2

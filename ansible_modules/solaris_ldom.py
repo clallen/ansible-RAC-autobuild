@@ -2,7 +2,7 @@
 
 import platform, subprocess, sys, re
 sys.path.append("/home/clallen/solaris_venv/lib/python2.7/site-packages")
-sys.path.append("/home/clallen/work/ansible_modules")
+sys.path.append("/home/clallen/work/autobuild/ansible_modules")
 import agent.lib.ldoms.ldmxml
 from ldevblock import LDEVBlock
 
@@ -392,7 +392,7 @@ class LDOM:
                     "id": 3,
                     "backend": "/dev/dsk/"+devices[self.name+"_OS_04"],
                     "mpgroup": self.name+"-dbdisk0" },
-                    { "vdisk": self.name+"cmd0",
+                    { "vdisk": self.name+"-cmd0",
                     "vds": "primary-vds"+self.vds_id,
                     "volume": self.name+"-cmd0",
                     "id": 99,

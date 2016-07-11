@@ -7,13 +7,6 @@ memory: "4"
 ldom_mgmt_ip: "130.164.28.116"
 rac_dbvers: "12.2.1.3"
 rac_storage: [ "AUTOBLD_ENV_DATA", "AUTOBLD_ENV_FRA", "AUTOBLD_ENV_OCR" ]
-vnets: [ { "vnet": "mgmt0", "vswitch": "primary-vsw0", "id": "0", "pvid": "1" },
-         { "vnet": "pubnet0", "vswitch": "primary-vsw1", "id": "1", "pvid": "1322" },
-         { "vnet": "pubnet1", "vswitch": "primary-vsw1", "id": "2", "pvid": "1322" },
-         { "vnet": "privnet0", "vswitch": "primary-vsw2", "id": "3", "pvid": "913" },
-         { "vnet": "privnet1", "vswitch": "primary-vsw2", "id": "4", "pvid": "913" } ]
 
-# AI and management network defaults (usually will not change)
+# Automated Installer
 ai_server_ip: 130.164.51.133
-mgmt_gw: 130.164.28.1
-mgmt_nm: 255.255.255.0
