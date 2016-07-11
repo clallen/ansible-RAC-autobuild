@@ -80,16 +80,11 @@
     register: privip_result
     tags:
       - net
-  - name: Format private IPs
-    set_fact:
-      priv_ips: "{{ privip_result.results | map(attribute='ansible_facts.priv_lookup') | list }}"
-    tags:
-      - net
   - name: Add private IPs to hosts file
     lineinfile:
       dest: /etc/inet/hosts
       line: "{{item}}"
-    with_items: "{{priv_ips}}"
+    with_items: "{{ privip_result.results | map(attribute='ansible_facts.priv_lookup') | list }}"
     tags:
       - net
 
