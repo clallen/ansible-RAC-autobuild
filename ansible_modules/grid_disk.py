@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import os, subprocess, pwd, grp, stat
+import os, platform, subprocess, pwd, grp, stat
 from stat import S_IMODE
 
 GAWK_CODE = 'BEGIN { RS=":" } { if (NR==2) { sect_per_cyl=$11\ntotal_cyl=$17 } } END { first_sect=sect_per_cyl\nsect_count=(sect_per_cyl * total_cyl - first_sect)\nprint "0 0 00 "first_sect" "sect_count }'
@@ -10,6 +10,9 @@ def main():
 
     changed = False
     msg = []
+
+    if platform.system() != "SunOS":
+        module.fail_json(msg = "This module requires Solaris")
 
     if module.check_mode:
         self.msg.append('RUNNING IN CHECK MODE - NO CHANGES WILL BE MADE')

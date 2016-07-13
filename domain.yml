@@ -53,6 +53,7 @@
     when: inventory_hostname | match(".*1-mgmt$")
     tags:
       - pkgs
+      - horcm
 
     # net
   - name: Setup RAC networks
@@ -101,6 +102,7 @@
       line: "grid:x:{{grid_uid}}:{{oinstall_gid}}:{{pub_hostname}}-grid:/home/grid:/usr/bin/bash"
     tags:
       - users
+      - disk
   - name: Create oracle ZFS homedir
     zfs:
       state: present

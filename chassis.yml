@@ -3,8 +3,8 @@
 
   vars:
     vnets: [ { "vnet": "mgmt0", "vswitch": "primary-vsw0", "id": "0", "pvid": "1" },
-             { "vnet": "pubnet0", "vswitch": "primary-vsw1", "id": "1", "pvid": "1322" },
-             { "vnet": "pubnet1", "vswitch": "primary-vsw1", "id": "2", "pvid": "1322" },
+             { "vnet": "pubnet0", "vswitch": "primary-vsw1", "id": "1", "pvid": "{{public_pvid}}" },
+             { "vnet": "pubnet1", "vswitch": "primary-vsw1", "id": "2", "pvid": "{{public_pvid}}" },
              { "vnet": "privnet0", "vswitch": "primary-vsw2", "id": "3", "pvid": "913" },
              { "vnet": "privnet1", "vswitch": "primary-vsw2", "id": "4", "pvid": "913" } ]
     mgmt_hostname: "{{ldom_name}}-mgmt"
