@@ -227,9 +227,47 @@
     tags:
       - disk
   
+    # vfstab
+  - name: Create /opt/local mountpoint
+    file:
+      path: /opt/local
+      state: directory
+    tags:
+      - vfstab
+      - horcm
+  - name: Add /opt/local to /etc/vfstab
+    lineinfile:
+      dest: /etc/vfstab
+      line: "aphrodite:/it/opt_local/opt/local - /opt/local nfs 3 yes vers=3,rsize=32768,wsize=32768,ro,intr,bg"
+    tags:
+      - vfstab
+      - horcm
+
     # horcm
-  #- name: Setup horcm
-  #  command: /tmp/scripts/horcm_setup.sh "{{horcminst}}"
+  - name: Add horcm {{horcminst}} service instance
+    command: "/usr/sbin/svccfg -s site/horcm add {{horcminst}}"
+    when: inventory_hostname | match(".*1-mgmt$")
+    tags:
+      - horcm
+  - name: Add horcm framework property group
+    command: "/usr/sbin/svccfg -s site/horcm:{{horcminst}} addpg general framework"
+    when: inventory_hostname | match(".*1-mgmt$")
+    tags:
+      - horcm
+  - name: Set horcm enabled property to false
+    command: "/usr/sbin/svccfg -s site/horcm:{{horcminst}} addpropvalue general/enabled boolean: false"
+    when: inventory_hostname | match(".*1-mgmt$")
+    tags:
+      - horcm
+  - name: Copy base horcm config file to /etc
+    copy:
+      remote_src: True
+      src: "/opt/local/scripts/production/ovm/files/horcm{{horcminst}}.conf"
+      dest: /etc
+    when: inventory_hostname | match(".*1-mgmt$")
+    tags:
+      - horcm
+#TODO: edit horcm config
 
     # salt
   - name: Add Salt master to /etc/hosts
