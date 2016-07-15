@@ -33,5 +33,5 @@ env_blocks: [
 # notes:
 #
 # test blocks on GS6:
-# OS: 6c:48-4f
+# OS: 6c:48-4b 6c:4c-4f
 # ENV: 6c:94-9f

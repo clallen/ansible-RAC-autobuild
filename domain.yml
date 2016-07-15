@@ -228,34 +228,30 @@
       - disk
   
     # vfstab
-  - name: Create /opt/local mountpoint
-    file:
-      path: /opt/local
-      state: directory
-    tags:
-      - vfstab
-      - horcm
-  - name: Add /opt/local to /etc/vfstab
-    lineinfile:
-      dest: /etc/vfstab
-      line: "aphrodite:/it/opt_local/opt/local - /opt/local nfs 3 yes vers=3,rsize=32768,wsize=32768,ro,intr,bg"
+  - name: Add /opt/local to /etc/vfstab and mount it
+    mount:
+      src: aphrodite:/it/opt_local/opt/local
+      name: /opt/local
+      fstype: nfs
+      opts: vers=3,rsize=32768,wsize=32768,ro,intr,bg
+      state: mounted
     tags:
       - vfstab
       - horcm
 
     # horcm
   - name: Add horcm {{horcminst}} service instance
-    command: "/usr/sbin/svccfg -s site/horcm add {{horcminst}}"
+    command: "/usr/sbin/svccfg -s site/horcm add horcm{{horcminst}}"
     when: inventory_hostname | match(".*1-mgmt$")
     tags:
       - horcm
   - name: Add horcm framework property group
-    command: "/usr/sbin/svccfg -s site/horcm:{{horcminst}} addpg general framework"
+    command: "/usr/sbin/svccfg -s site/horcm:horcm{{horcminst}} addpg general framework"
     when: inventory_hostname | match(".*1-mgmt$")
     tags:
       - horcm
   - name: Set horcm enabled property to false
-    command: "/usr/sbin/svccfg -s site/horcm:{{horcminst}} addpropvalue general/enabled boolean: false"
+    command: "/usr/sbin/svccfg -s site/horcm:horcm{{horcminst}} addpropvalue general/enabled boolean: false"
     when: inventory_hostname | match(".*1-mgmt$")
     tags:
       - horcm
