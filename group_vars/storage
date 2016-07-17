@@ -2,29 +2,33 @@
 # - OS storage will need to be changed before each node creation run
 
 # RAC node OS
-os_pool: "36"
 os_chassis: [ "todd" ]
-os_ports: [ "CL1-B", "CL2-B" ]
 os_blocks: [
 { "name": "{{ldom_name}}_OS",
+"pool": "36",
+"ports": [ "CL1-B", "CL2-B" ],
 "begin": "6C:4c",
 "end": "6C:4f",
 "size": "50" } ]
 
 # RAC envs
-env_pool: "36"
 env_chassis: [ "todd" ]
-env_ports: [ "CL1-B", "CL2-B" ]
 env_blocks: [
 { "name": "AUTOBLD_ENV_DATA",
+"pool": "36",
+"ports": [ "CL1-B", "CL2-B" ],
 "begin": "6C:94",
 "end": "6C:9b",
 "size": "1024" },
 { "name": "AUTOBLD_ENV_FRA",
+"pool": "36",
+"ports": [ "CL1-B", "CL2-B" ],
 "begin": "6C:9c",
 "end": "6C:9d",
 "size": "500" },
 { "name": "AUTOBLD_ENV_OCR",
+"pool": "36",
+"ports": [ "CL1-B", "CL2-B" ],
 "begin": "6C:9e",
 "end": "6C:9f",
 "size": "100" } ]

@@ -28,6 +28,6 @@ def main():
 
 from ansible.module_utils.basic import *
 if __name__ == '__main__':
-        main()
+    main()
 
 # vim: textwidth=80 formatoptions=cqt wrapmargin=0

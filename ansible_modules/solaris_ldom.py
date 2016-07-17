@@ -359,7 +359,7 @@ class LDOM:
 
     def setup_rac_OS_disks(self):
         if not self.module.check_mode:
-            devices = LDEVBlock.hds_scan(self.name)
+            devices = LDEVBlock.hds_scan(self.name, "device")
             try:
                 self.vdisks = [
                     # primary
@@ -437,7 +437,7 @@ class LDOM:
             self.vdisks = []
             vdisk_id = 10
             for env in self.rac_storage:
-                devices = LDEVBlock.hds_scan(env)
+                devices = LDEVBlock.hds_scan(env, "device")
                 for volname in sorted(devices):
                     device = devices[volname]
                     # primary

@@ -2,10 +2,6 @@
 
 import subprocess, re, platform
 
-GS5_SERIAL = "10471"
-GS5_CMD_DEV = "c0t60060E801604710000010471000025FFd0s2"
-GS6_CMD_DEV = "c0t60060E80166BCD0000016BCD000026FFd0s2"
-
 DOCUMENTATION = """
 ---
 module: ldevblock
@@ -51,6 +47,12 @@ options:
 class LDEVBlock:
     RAIDCOM = "/HORCM/usr/bin/raidcom"
     TIERED = [ 15, 16 ]
+    GS5_SERIAL = "66673"
+    GS6_SERIAL = "93133"
+    GS7_SERIAL = "12345"
+    GS5_CMD_DEV = "c0t60060E801604710000010471000025FFd0s2"
+    GS6_CMD_DEV = "c0t60060E80166BCD0000016BCD000026FFd0s2"
+    GS7_CMD_DEV = "c0t60060E80166fddsseeewqwwefassa6FFd0s2"
 
     def __init__(self, module, name, begin, end, size, ports, pool):
         self.module = module
@@ -135,38 +137,57 @@ class LDEVBlock:
             self.changed = True
 
     @staticmethod
+    def get_serial(horcminst):
+        if horcminst == "horcm5":
+            return LDEVBlock.GS5_SERIAL
+        if horcminst == "horcm6":
+            return LDEVBlock.GS6_SERIAL
+        if horcminst == "horcm7":
+            return LDEVBlock.GS7_SERIAL
+
+    @staticmethod
     def get_cmd_device(device):
         """ Return the command device for a SAN frame given a particular device
         node string. """
-        # (I really hate coding in stuff like this but don't see another
-        # option)
-        if re.match(GS5_SERIAL, device):
-            # geeksan5
-            return GS5_CMD_DEV
-        else:
-            # geeksan6
-            return GS6_CMD_DEV
+        if re.search(format(LDEVBlock.GS5_SERIAL, "X"), device) is not None:
+            return LDEVBlock.GS5_CMD_DEV
+        if re.search(format(LDEVBlock.GS6_SERIAL, "X"), device) is not None:
+            return LDEVBlock.GS6_CMD_DEV
+        if re.search(format(LDEVBlock.GS7_SERIAL, "X"), device) is not None:
+            return LDEVBlock.GS7_CMD_DEV
 
     @staticmethod
-    def hds_scan(blockname):
-        """ Returns a dictionary of LDEV names mapped to device ids.
+    def hds_scan(blockname, return_type):
+        """ Returns a dictionary of LDEV names mapped to device ids, or mapped to LDEV ids, depending on C{return_type}.
+        args:
+        - blockname: the LDEV name pattern to search
+        - return_type: if "device", return device node names, if "ldev" return LDEV ids
         
-        Example: { "ldevname1": "c0t60060E80166BCD0000016BCD00006DE0d0s2" }
+        Return type "devices": { "ldevname1": "c0t60060E80166BCD0000016BCD00006DE0d0s2" }
+        Return type "ldev": { "ldevname1": "15:6C" }
         """
         try:
             lines = subprocess.check_output("/usr/bin/ls /dev/rdsk/* | "+
                                     "/HORCM/usr/bin/inqraid -fnx -CLI | "+
                                     "/usr/bin/grep "+blockname, shell = True)
-            result = dict()
+        except subprocess.CalledProcessError as e:
+            module.fail_json(msg = "Unable to scan for backend devices: "+
+                             e.output)
+        result = dict()
+        if return_type == "device":
             for line in lines.splitlines():
                 columns = line.split()
                 device = columns[0].strip()
                 name = columns[8].strip()
                 result[name] = device
-            return result
-        except subprocess.CalledProcessError as e:
-            module.fail_json(msg = "Unable to scan for backend devices: "+
-                             e.output)
+        else:
+            for line in lines.splitlines():
+                columns = line.split()
+                tmp = columns[3].strip()
+                ldev = tmp[:2]+":"+tmp[2:]
+                name = columns[8].strip()
+                result[name] = ldev
+        return result
 
     def _ldev_exists(self, ldev):
         output = self._run_cmd("get ldev -ldev_id "+ldev+" -I"+self.horcm)

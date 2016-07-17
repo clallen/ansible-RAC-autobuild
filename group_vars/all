@@ -4,3 +4,4 @@
 horcminst: "6"
 ldom_name: "autobld1"
 public_pvid: "1427"
+rac_storage: [ "AUTOBLD_ENV_DATA", "AUTOBLD_ENV_FRA", "AUTOBLD_ENV_OCR" ]
