@@ -2,6 +2,9 @@
 - hosts: domain
 
   vars:
+    oracle_uid: 10
+    grid_uid: 61001
+    oinstall_gid: 111
     ssh_tmpdir: "{{lookup('env','HOME')}}/autobuild_ssh"
     ssh_key_basename: "{{inventory_hostname | regex_replace('\\d?-mgmt$', '')}}"
     zfs_home_fs: rpool/apps/users

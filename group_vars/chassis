@@ -1,7 +1,7 @@
 # Used during domain setup and install
 #
 
-# domain-specific (mgmt IP will need to change per run)
+# domain-specific
 cores: "1"
 memory: "4"
 rac_dbvers: "12.2.1.3"
