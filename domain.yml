@@ -42,33 +42,9 @@
     tags:
       - repos
 
-    # pkgs
-  - name: Install extra packages
-    pkg5:
-      name:
-        - salt
-        - ucb
-        - vim
-    tags:
-      - pkgs
-  - name: Install horcm on node 1
-    pkg5: name=horcm
-    when: inventory_hostname | match(".*1-mgmt$")
-    tags:
-      - pkgs
-      - horcm
-
     # net
   - name: Setup RAC networks
     rac_net:
-    tags:
-      - net
-  - name: Change hostname identity property
-    command: "/usr/sbin/svccfg -s identity:node setprop config/nodename = astring: {{pub_hostname}}"
-    tags:
-      - net
-  - name: Refresh identity service
-    command: "/usr/sbin/svcadm refresh identity:node"
     tags:
       - net
   - name: Add public IP to hosts file
@@ -141,13 +117,11 @@
       - ssh
   - name: Create local oracle SSH keypair
     local_action: "command /usr/bin/ssh-keygen -t dsa -C 'oracle@{{ssh_key_basename}}' -N '' -f {{ssh_tmpdir}}/{{ssh_key_basename}}-oracle creates={{ssh_tmpdir}}/{{ssh_key_basename}}-oracle"
-    when: inventory_hostname | match(".*1-mgmt$")
     become: False
     tags:
       - ssh
   - name: Create local grid SSH keypair
     local_action: "command /usr/bin/ssh-keygen -t dsa -C 'grid@{{ssh_key_basename}}' -N '' -f {{ssh_tmpdir}}/{{ssh_key_basename}}-grid creates={{ssh_tmpdir}}/{{ssh_key_basename}}-grid"
-    when: inventory_hostname | match(".*1-mgmt$")
     become: False
     tags:
       - ssh
@@ -242,7 +216,13 @@
 #      - vfstab
 
     # horcm
-  - name: Add horcm {{horcminst}} service instance
+  - name: Install horcm (node 1 only)
+    pkg5: name=horcm
+    when: inventory_hostname | match(".*1-mgmt$")
+    tags:
+      - horcm
+      - pkgs
+  - name: Add horcm {{horcminst}} service instance (node 1 only)
     horcm_setup:
       horcminst: "horcm{{horcminst}}"
       disk_groups: "{{rac_storage}}"
@@ -251,6 +231,17 @@
       - horcm
 
     # salt
+  - name: Install salt
+    pkg5: name=horcm
+    tags:
+      - salt
+      - pkgs
+  - name: Import salt manifests
+    service:
+      name: manifest-import
+      state: restarted
+    tags:
+      - salt
   - name: Add Salt master to /etc/hosts
     lineinfile:
       dest: /etc/hosts
@@ -263,5 +254,14 @@
       enabled: yes
     tags:
       - salt
+
+    # pkgs
+  - name: Install extra packages
+    pkg5:
+      name:
+        - ucb
+        - vim
+    tags:
+      - pkgs
 
 # vim: tabstop=2 shiftwidth=2

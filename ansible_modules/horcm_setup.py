@@ -44,7 +44,7 @@ def main():
             module.run_command("/usr/sbin/svccfg -s site/horcm:"+horcminst+" addpropvalue general/enabled boolean: false", check_rc = True)
             changed = True
 
-    serial = LDEVBlock.get_serial(horcminst)
+    serial = str(LDEVBlock.get_serial(horcminst))
     ldev_lines = []
     inst_lines = []
     for disk_group in disk_groups:

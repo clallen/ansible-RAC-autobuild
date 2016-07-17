@@ -47,9 +47,9 @@ options:
 class LDEVBlock:
     RAIDCOM = "/HORCM/usr/bin/raidcom"
     TIERED = [ 15, 16 ]
-    GS5_SERIAL = "66673"
-    GS6_SERIAL = "93133"
-    GS7_SERIAL = "12345"
+    GS5_SERIAL = 66673
+    GS6_SERIAL = 93133
+    GS7_SERIAL = 12345
     GS5_CMD_DEV = "c0t60060E801604710000010471000025FFd0s2"
     GS6_CMD_DEV = "c0t60060E80166BCD0000016BCD000026FFd0s2"
     GS7_CMD_DEV = "c0t60060E80166fddsseeewqwwefassa6FFd0s2"
@@ -138,6 +138,8 @@ class LDEVBlock:
 
     @staticmethod
     def get_serial(horcminst):
+        """ Return the decimal serial number of the storage frame for the given
+        HORCM instance """
         if horcminst == "horcm5":
             return LDEVBlock.GS5_SERIAL
         if horcminst == "horcm6":
@@ -147,7 +149,7 @@ class LDEVBlock:
 
     @staticmethod
     def get_cmd_device(device):
-        """ Return the command device for a SAN frame given a particular device
+        """ Return the command device for the storage frame for the given device
         node string. """
         if re.search(format(LDEVBlock.GS5_SERIAL, "X"), device) is not None:
             return LDEVBlock.GS5_CMD_DEV
@@ -158,7 +160,8 @@ class LDEVBlock:
 
     @staticmethod
     def hds_scan(blockname, return_type):
-        """ Returns a dictionary of LDEV names mapped to device ids, or mapped to LDEV ids, depending on C{return_type}.
+        """ Returns a dictionary of LDEV names mapped to device ids, or mapped 
+        to LDEV ids, depending on C{return_type}.
         args:
         - blockname: the LDEV name pattern to search
         - return_type: if "device", return device node names, if "ldev" return LDEV ids
@@ -180,7 +183,7 @@ class LDEVBlock:
                 device = columns[0].strip()
                 name = columns[8].strip()
                 result[name] = device
-        else:
+        elif return_type == "ldev":
             for line in lines.splitlines():
                 columns = line.split()
                 tmp = columns[3].strip()

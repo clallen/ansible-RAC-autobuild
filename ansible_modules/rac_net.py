@@ -100,6 +100,8 @@ def main():
                     time.sleep(5)
                 except subprocess.CalledProcessError as e:
                     module.fail_json(msg = "Error building IPMP interface "+ifname+": "+e.output.strip())
+                else:
+                    changed = True
 
     # create IP addresses
     # pubnet
@@ -114,6 +116,8 @@ def main():
                 subprocess.check_output(["/usr/sbin/ipadm", "create-addr", "-T", "static", "-a", "local="+pub_IP+"/"+pub_mask, "pubnet0"], stderr=subprocess.STDOUT)
             except subprocess.CalledProcessError as e:
                 module.fail_json(msg = "Error creating IP address on interface pubnet0: "+e.output.strip())
+            else:
+                changed = True
     # privnet
     try:
         ifstate = subprocess.check_output(["/usr/sbin/ipadm", "show-if", "-po", "STATE", "privnet0"], stderr=subprocess.STDOUT).strip()
@@ -126,6 +130,8 @@ def main():
                 subprocess.check_output(["/usr/sbin/ipadm", "create-addr", "-T", "static", "-a", "local="+priv_IP+"/"+PRIV_MASK, "privnet0"], stderr=subprocess.STDOUT)
             except subprocess.CalledProcessError as e:
                 module.fail_json(msg = "Error creating IP address on interface privnet0: "+e.output.strip())
+            else:
+                changed = True
 
     # set IPMP transitive probing
     try:
@@ -140,6 +146,8 @@ def main():
                 subprocess.check_output(["/usr/sbin/svcadm", "restart", "ipmp"], stderr=subprocess.STDOUT)
             except subprocess.CalledProcessError as e:
                 module.fail_json(msg = "Error setting IPMP transitive probing: "+e.output.strip())
+            else:
+                changed = True
 
     # replace default route with public
     try:
@@ -155,6 +163,24 @@ def main():
                 subprocess.check_output(["/usr/sbin/route", "-p", "delete", "default", cur_gw], stderr=subprocess.STDOUT)
             except subprocess.CalledProcessError as e:
                 module.fail_json(msg = "Error setting default route: "+e.output.strip())
+            else:
+                changed = True
+
+    # set hostname identity property
+    try:
+        cur_hostname = subprocess.check_output(["/usr/bin/svcprop", "-p", "config/nodename", "identity:node"], stderr=subprocess.STDOUT).strip()
+    except subprocess.CalledProcessError as e:
+        module.fail_json(msg = "Error querying current hostname identity property: "+e.output.strip())
+    if cur_hostname != pub_hostname:
+        msg.append("Setting hostname identity property to "+pub_hostname)
+        if not module.check_mode:
+            try:
+                subprocess.check_output(["/usr/sbin/svccfg", "-s", "identity:node", "setprop", "config/nodename", "=", "astring:", pub_hostname], stderr=subprocess.STDOUT)
+                subprocess.check_output(["/usr/sbin/svcadm", "refresh", "identity:node"], stderr=subprocess.STDOUT)
+            except subprocess.CalledProcessError as e:
+                module.fail_json(msg = "Error setting hostname identity property: "+e.output.strip())
+            else:
+                changed = True
 
     module.exit_json(changed = changed, msg = " | ".join(msg))
 
