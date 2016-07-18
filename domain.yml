@@ -232,7 +232,7 @@
 
     # salt
   - name: Install salt
-    pkg5: name=horcm
+    pkg5: name=salt
     tags:
       - salt
       - pkgs
