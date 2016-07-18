@@ -4,7 +4,21 @@ import socket, sys
 sys.path.append("/home/clallen/work/autobuild/ansible_modules")
 from ldevblock import LDEVBlock
 
-HORCM_CONF_TEMPLATE = "HORCM_MON\n#ip_address\tservice poll(10ms)\ttimeout(10ms)\n{}\t\t{}\t1000\t\t3000\n\nHORCM_CMD\n\\\\.\\CMD-{}:/dev/rdsk/*\n\nHORCM_LDEV\n#dev_group\tdev_name\tSerial#\tCU:LDEV(LDEV#)\tMU#\n{}\n\nHORCM_INST\n#dev_group\tip_address\tservice\n{}\n"
+MON_COLUMNS_FORMAT = "{:15}{:10}{:15}{}"
+LDEV_COLUMNS_FORMAT = "{:30}{:30}{:10}{:18}{}"
+INST_COLUMNS_FORMAT = "{:30}{:15}{}"
+HORCM_CONF_TEMPLATE = ("HORCM_MON\n"+
+                      MON_COLUMNS_FORMAT+"\n"+
+                      MON_COLUMNS_FORMAT+"\n\n"
+                      "HORCM_CMD\n"
+                      "#dev name\n"
+                      "\\\\.\\CMD-{}:/dev/rdsk/*\n\n"
+                      "HORCM_LDEV\n"+
+                      LDEV_COLUMNS_FORMAT+"\n"
+                      "{}\n\n"
+                      "HORCM_INST\n"+
+                      INST_COLUMNS_FORMAT+"\n"
+                      "{}\n")
 SI_HOST = "boxmgr"
 
 def main():
@@ -44,30 +58,38 @@ def main():
             module.run_command("/usr/sbin/svccfg -s site/horcm:"+horcminst+" addpropvalue general/enabled boolean: false", check_rc = True)
             changed = True
 
+    # populate template
+    msg.append("Building HORCM config")
     serial = str(LDEVBlock.get_serial(horcminst))
     ldev_lines = []
     inst_lines = []
     for disk_group in disk_groups:
         ldevs = LDEVBlock.hds_scan(disk_group, "ldev")
         for ldev_name in ldevs.iterkeys():
-            ldev_lines.append(disk_group+"\t"+ldev_name+"\t"+serial+"\t"+ldevs[ldev_name]+"\t0")
-        inst_lines.append(disk_group+"\t"+SI_HOST+"\t"+horcminst)
-    # template field order:
-    # hostname
-    # horcminst
-    # serial
-    # ldev_lines
-    # inst_lines
-    horcm_conf_lines = HORCM_CONF_TEMPLATE.format(socket.gethostname().split(".")[0], horcminst, serial, "\n".join(ldev_lines), "\n".join(inst_lines))
+            ldev_lines.append(LDEV_COLUMNS_FORMAT.format(disk_group, ldev_name, serial, ldevs[ldev_name], "0"))
+        inst_lines.append(INST_COLUMNS_FORMAT.format(disk_group, SI_HOST, horcminst))
+    horcm_conf_lines = HORCM_CONF_TEMPLATE.format("#ip_address", "service", "poll(10ms)", "timeout(10ms)",
+                                                  socket.gethostname().split(".")[0], horcminst, "1000", "3000",
+                                                  serial,
+                                                  "#dev_group", "dev_name", "Serial#", "CU:LDEV(LDEV#)", "MU#",
+                                                  "\n".join(ldev_lines),
+                                                  "#dev_group", "ip_address", "service",
+                                                  "\n".join(inst_lines))
 
     # write out the file
     horcm_conf_file = "/etc/"+horcminst+".conf"
-    try:
-        fh = open(horcm_conf_file, "w+")
-    except IOError as e:
-        module.fail_json(msg = "Error opening "+horcm_conf_file+": "+e.strerror)
-    fh.write(horcm_conf_lines)
-    fh.close()
+    if os.path.isfile(horcm_conf_file):
+        msg.append("HORCM config file "+horcm_conf_file+" exists, not overwriting")
+    else:
+        msg.append("Writing HORCM config to "+horcm_conf_file)
+        if not module.check_mode:
+            try:
+                fh = open(horcm_conf_file, "w+")
+            except IOError as e:
+                module.fail_json(msg = "Error opening "+horcm_conf_file+": "+e.strerror)
+            fh.write(horcm_conf_lines)
+            fh.close()
+            changed = True
 
     module.exit_json(changed = changed, msg = msg)
 
