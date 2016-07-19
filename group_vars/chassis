@@ -2,9 +2,13 @@
 #
 
 # domain-specific
-cores: "1"
-memory: "4"
-rac_dbvers: "12.2.1.3"
+cores: 1
+memory: 4
+rac_dbvers: 12.2.1.3
 
-# Automated Installer
-ai_server_ip: 130.164.51.133
+# automated installer variables
+#ai_server_ip: 130.164.51.133
+ai_server_ip: 130.164.42.236
+ai_service: solaris-11_3-sru-9_4_0-sparc
+cfengine_class: dev
+build_profiles: "-b orarac -b pgo_dba -b pgc_pre_release"

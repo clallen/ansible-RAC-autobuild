@@ -1,0 +1,55 @@
+---
+- hosts: chassis
+
+  vars:
+    vnets: [ { "vnet": "mgmt0", "vswitch": "primary-vsw0", "id": "0", "pvid": "1" },
+             { "vnet": "pubnet0", "vswitch": "primary-vsw1", "id": "1", "pvid": "{{public_pvid}}" },
+             { "vnet": "pubnet1", "vswitch": "primary-vsw1", "id": "2", "pvid": "{{public_pvid}}" },
+             { "vnet": "privnet0", "vswitch": "primary-vsw2", "id": "3", "pvid": "913" },
+             { "vnet": "privnet1", "vswitch": "primary-vsw2", "id": "4", "pvid": "913" } ]
+    mgmt_hostname: "{{ldom_name}}-mgmt"
+    mgmt_ip: "{{lookup('dig', mgmt_hostname)}}"
+    mgmt_gw: 130.164.28.1
+    mgmt_nm: 255.255.255.0
+    dns_domain: natinst.com
+
+  tasks:
+  - name: Setup domain {{ldom_name}} on {{inventory_hostname}}
+    solaris_ldom:
+      state: bound
+      name: "{{ldom_name}}"
+      cores: "{{cores}}"
+      memory: "{{memory}}"
+      domain_vars:
+        {
+        "network-boot-arguments": "host-ip={{mgmt_ip}},router-ip={{mgmt_gw}},subnet-mask={{mgmt_nm}},hostname={{mgmt_hostname}},file=http://{{ai_server_ip}}:5555/cgi-bin/wanboot-cgi",
+        "boot-device": "net",
+        "boot-file": "- install"
+        }
+      rac_dbvers: "{{rac_dbvers}}"
+      rac_storage: "{{rac_storage}}"
+      vnets: "{{vnets}}"
+  - name: Get mgmt MAC address
+    shell: "/usr/sbin/ldm list -p -o net {{ldom_name}}|/usr/bin/grep mgmt|/usr/bin/awk -F'|' '{print $5}'|/usr/bin/awk -F= '{print $2}'"
+    register: ldm_output
+  - name: Check AI server for existing client profile
+    shell: "/usr/sbin/installadm list -c | /usr/bin/grep {{ldm_output.stdout}}"
+    ignore_errors: yes
+    register: check_output
+    delegate_to: "{{groups['aiserver'][0]}}"
+  - name: Add client profile to AI server
+    shell: "/bin/aiconf -H {{mgmt_hostname}} -d {{dns_domain}} -i {{mgmt_ip}} -e {{ldm_output.stdout}} -n {{ai_service}} -c {{cfengine_class}} {{build_profiles}}"
+    delegate_to: "{{groups['aiserver'][0]}}"
+    when: check_output.rc != 0
+  - name: Start domain
+    solaris_ldom:
+      state: active
+      name: "{{ldom_name}}"
+  - name: Give domain time to boot
+    wait_for: timeout=10
+  - name: Remove boot install flag
+    solaris_ldom:
+      name: "{{ldom_name}}"
+      domain_vars: { "boot-file": }
+
+# vim: tabstop=2 shiftwidth=2
