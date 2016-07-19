@@ -4,3 +4,4 @@
 solaris_repo: http://aisalt.natinst.com/
 site_repo: http://aisalt.natinst.com:81/
 salt_master_ip: 130.164.51.133
+patch_audit_rev: 2016Q3

@@ -1,5 +1,6 @@
 ---
 - hosts: domain
+  gather_facts: true
 
   vars:
     oracle_uid: 10
@@ -10,6 +11,7 @@
     zfs_home_fs: rpool/apps/users
     domain: natinst.com
     pub_hostname: "{{inventory_hostname | regex_replace('-mgmt$', '')}}"
+    patch_audit_file: /var/cfengine/etc/classes/last_patched
 
   tasks:
     # repos
@@ -47,12 +49,14 @@
     rac_net:
     tags:
       - net
+      - cfengine
   - name: Add public IP to hosts file
     lineinfile:
       dest: /etc/inet/hosts
       line: "{{lookup('dig', pub_hostname)}} {{pub_hostname}} {{pub_hostname}}.{{domain}}"
     tags:
       - net
+      - cfengine
   - name: Lookup private IPs
     set_fact:
       priv_lookup: "{{lookup('dig', item | regex_replace('-mgmt$', '-priv1'))}} {{item | regex_replace('-mgmt$', '-priv1')}}"
@@ -60,6 +64,7 @@
     register: privip_result
     tags:
       - net
+      - cfengine
   - name: Add private IPs to hosts file
     lineinfile:
       dest: /etc/inet/hosts
@@ -67,6 +72,7 @@
     with_items: "{{ privip_result.results | map(attribute='ansible_facts.priv_lookup') | list }}"
     tags:
       - net
+      - cfengine
 
     # users
   - name: Create oracle user
@@ -115,16 +121,19 @@
     become: False
     tags:
       - ssh
+      - cfengine
   - name: Create local oracle SSH keypair
     local_action: "command /usr/bin/ssh-keygen -t dsa -C 'oracle@{{ssh_key_basename}}' -N '' -f {{ssh_tmpdir}}/{{ssh_key_basename}}-oracle creates={{ssh_tmpdir}}/{{ssh_key_basename}}-oracle"
     become: False
     tags:
       - ssh
+      - cfengine
   - name: Create local grid SSH keypair
     local_action: "command /usr/bin/ssh-keygen -t dsa -C 'grid@{{ssh_key_basename}}' -N '' -f {{ssh_tmpdir}}/{{ssh_key_basename}}-grid creates={{ssh_tmpdir}}/{{ssh_key_basename}}-grid"
     become: False
     tags:
       - ssh
+      - cfengine
   - name: Create oracle SSH dir
     file:
       state: directory
@@ -134,6 +143,7 @@
       mode: 0700
     tags:
       - ssh
+      - cfengine
   - name: Create grid SSH dir
     file:
       state: directory
@@ -143,6 +153,7 @@
       mode: 0700
     tags:
       - ssh
+      - cfengine
   - name: Copy oracle private key into place
     copy:
       src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-oracle"
@@ -152,6 +163,7 @@
       group: oinstall
     tags:
       - ssh
+      - cfengine
   - name: Copy oracle public key into place
     copy:
       src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-oracle.pub"
@@ -161,6 +173,7 @@
       group: oinstall
     tags:
       - ssh
+      - cfengine
   - name: Copy oracle public key into auth keys
     copy:
       src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-oracle.pub"
@@ -170,6 +183,7 @@
       group: oinstall
     tags:
       - ssh
+      - cfengine
   - name: Copy grid private key into place
     copy:
       src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-grid"
@@ -179,6 +193,7 @@
       group: oinstall
     tags:
       - ssh
+      - cfengine
   - name: Copy grid public key into place
     copy:
       src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-grid.pub"
@@ -188,6 +203,7 @@
       group: oinstall
     tags:
       - ssh
+      - cfengine
   - name: Copy grid public key into auth keys
     copy:
       src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-grid.pub"
@@ -197,12 +213,14 @@
       group: oinstall
     tags:
       - ssh
+      - cfengine
 
     # disk
   - name: Setup GRID disks
     grid_disk:
     tags:
       - disk
+      - cfengine
   
     # vfstab
 #  - name: Add /opt/local to /etc/vfstab and mount it
@@ -222,6 +240,7 @@
     tags:
       - horcm
       - pkgs
+      - cfengine
   - name: Add horcm {{horcminst}} service instance (node 1 only)
     horcm_setup:
       horcminst: "horcm{{horcminst}}"
@@ -229,6 +248,7 @@
     when: inventory_hostname | match(".*1-mgmt$")
     tags:
       - horcm
+      - cfengine
 
     # salt
   - name: Install salt
@@ -263,5 +283,16 @@
         - vim
     tags:
       - pkgs
+
+    # patch audit
+  - name: Set patch audit file
+    lineinfile:
+      dest: "{{patch_audit_file}}"
+      state: present
+      regexp: "New_Build"
+      line: "{{patch_audit_rev}} Patching completed:\n{{ansible_date_time['date']}} {{ansible_date_time['time']}}"
+    tags:
+      - cfengine
+      - patch
 
 # vim: tabstop=2 shiftwidth=2
