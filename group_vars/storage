@@ -1,6 +1,3 @@
-# Used prior to domain setup
-# - OS storage will need to be changed before each node creation run
-
 # RAC node OS
 os_chassis: [ "todd" ]
 os_blocks: [

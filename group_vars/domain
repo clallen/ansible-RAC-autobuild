@@ -1,6 +1,3 @@
-# Used after domain OS install
-#
-
 solaris_repo: http://aisalt.natinst.com/
 site_repo: http://aisalt.natinst.com:81/
 salt_master_ip: 130.164.51.133
