@@ -1,6 +1,6 @@
 ---
 - hosts: domain
-  gather_facts: true
+#  gather_facts: true
 
   vars:
     oracle_uid: 10
@@ -47,6 +47,11 @@
     # net
   - name: Setup RAC networks
     rac_net:
+    tags:
+      - net
+      - cfengine
+  - name: Wait for gateway switchover
+    wait_for: timeout=5
     tags:
       - net
       - cfengine
@@ -214,6 +219,14 @@
     tags:
       - ssh
       - cfengine
+  - name: SSH to each cluster node
+    shell: "/usr/bin/sudo -u {{item[0]}} /usr/bin/ssh -o 'StrictHostkeyChecking no' -o 'BatchMode yes' {{item[1] | regex_replace('-mgmt$', '')}} 'exit'"
+    with_nested:
+      - [ "oracle", "grid" ]
+      - "{{groups['domain']}}"
+    tags:
+      - ssh
+      - cfengine
 
     # disk
   - name: Setup GRID disks
@@ -285,14 +298,18 @@
       - pkgs
 
     # patch audit
-  - name: Set patch audit file
-    lineinfile:
-      dest: "{{patch_audit_file}}"
-      state: present
-      regexp: "New_Build"
-      line: "{{patch_audit_rev}} Patching completed:\n{{ansible_date_time['date']}} {{ansible_date_time['time']}}"
+  - name: Get date/time for patch audit file
+    setup: filter=ansible_date_time gather_subset=!hardware,!network,!virtual,!ohai,!facter
     tags:
+      - patchdb
       - cfengine
-      - patch
+  - name: Set patch audit file
+    replace:
+      dest: "{{patch_audit_file}}"
+      regexp: "^New_Build"
+      replace: "{{patch_audit_rev}} Patching completed:\n{{ansible_date_time['date']}} {{ansible_date_time['time']}}"
+    tags:
+      - patchdb
+      - cfengine
 
 # vim: tabstop=2 shiftwidth=2

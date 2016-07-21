@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import platform, subprocess, sys, re
-sys.path.append("/home/clallen/solaris_venv/lib/python2.7/site-packages")
+sys.path.append("/opt/local/scripts/production/ovm/lib/python2.7/site-packages")
 sys.path.append("/home/clallen/work/autobuild/ansible_modules")
 from agent.lib.ldoms.ldmxml import *
 from ldevblock import LDEVBlock
