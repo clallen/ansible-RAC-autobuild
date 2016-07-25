@@ -7,10 +7,8 @@
     grid_uid: 61001
     oinstall_gid: 111
     ssh_tmpdir: "{{lookup('env','HOME')}}/autobuild_ssh"
-    ssh_key_basename: "{{inventory_hostname | regex_replace('\\d?-mgmt$', '')}}"
-    zfs_home_fs: rpool/apps/users
+    zfs_home_dataset: rpool/apps/users
     domain: natinst.com
-    pub_hostname: "{{inventory_hostname | regex_replace('-mgmt$', '')}}"
     patch_audit_file: /var/cfengine/etc/classes/last_patched
 
   tasks:
@@ -58,7 +56,7 @@
   - name: Add public IP to hosts file
     lineinfile:
       dest: /etc/inet/hosts
-      line: "{{lookup('dig', pub_hostname)}} {{pub_hostname}} {{pub_hostname}}.{{domain}}"
+      line: "{{lookup('dig', ldom_name)}} {{ldom_name}} {{ldom_name}}.{{domain}}"
     tags:
       - net
       - cfengine
@@ -83,26 +81,26 @@
   - name: Create oracle user
     lineinfile:
       dest: /etc/passwd
-      line: "oracle:x:{{oracle_uid}}:{{oinstall_gid}}:{{pub_hostname}}-oracle:/home/oracle:/usr/bin/bash"
+      line: "oracle:x:{{oracle_uid}}:{{oinstall_gid}}:{{ldom_name}}-oracle:/home/oracle:/usr/bin/bash"
     tags:
       - users
   - name: Create grid user
     lineinfile:
       dest: /etc/passwd
-      line: "grid:x:{{grid_uid}}:{{oinstall_gid}}:{{pub_hostname}}-grid:/home/grid:/usr/bin/bash"
+      line: "grid:x:{{grid_uid}}:{{oinstall_gid}}:{{ldom_name}}-grid:/home/grid:/usr/bin/bash"
     tags:
       - users
       - disk
   - name: Create oracle ZFS homedir
     zfs:
       state: present
-      name: "{{zfs_home_fs}}/oracle"
+      name: "{{zfs_home_dataset}}/oracle"
     tags:
       - users
   - name: Create grid ZFS homedir
     zfs:
       state: present
-      name: "{{zfs_home_fs}}/grid"
+      name: "{{zfs_home_dataset}}/grid"
     tags:
       - users
   - name: Set ownership on oracle homedir
@@ -128,13 +126,13 @@
       - ssh
       - cfengine
   - name: Create local oracle SSH keypair
-    local_action: "command /usr/bin/ssh-keygen -t dsa -C 'oracle@{{ssh_key_basename}}' -N '' -f {{ssh_tmpdir}}/{{ssh_key_basename}}-oracle creates={{ssh_tmpdir}}/{{ssh_key_basename}}-oracle"
+    local_action: "command /usr/bin/ssh-keygen -t dsa -C 'oracle@{{cluster_name}}' -N '' -f {{ssh_tmpdir}}/{{cluster_name}}-oracle creates={{ssh_tmpdir}}/{{cluster_name}}-oracle"
     become: False
     tags:
       - ssh
       - cfengine
   - name: Create local grid SSH keypair
-    local_action: "command /usr/bin/ssh-keygen -t dsa -C 'grid@{{ssh_key_basename}}' -N '' -f {{ssh_tmpdir}}/{{ssh_key_basename}}-grid creates={{ssh_tmpdir}}/{{ssh_key_basename}}-grid"
+    local_action: "command /usr/bin/ssh-keygen -t dsa -C 'grid@{{cluster_name}}' -N '' -f {{ssh_tmpdir}}/{{cluster_name}}-grid creates={{ssh_tmpdir}}/{{cluster_name}}-grid"
     become: False
     tags:
       - ssh
@@ -161,7 +159,7 @@
       - cfengine
   - name: Copy oracle private key into place
     copy:
-      src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-oracle"
+      src: "{{ssh_tmpdir}}/{{cluster_name}}-oracle"
       dest: "/home/oracle/.ssh/id_dsa"
       mode: 0600
       owner: oracle
@@ -171,7 +169,7 @@
       - cfengine
   - name: Copy oracle public key into place
     copy:
-      src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-oracle.pub"
+      src: "{{ssh_tmpdir}}/{{cluster_name}}-oracle.pub"
       dest: "/home/oracle/.ssh/id_dsa.pub"
       mode: 0644
       owner: oracle
@@ -181,7 +179,7 @@
       - cfengine
   - name: Copy oracle public key into auth keys
     copy:
-      src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-oracle.pub"
+      src: "{{ssh_tmpdir}}/{{cluster_name}}-oracle.pub"
       dest: "/home/oracle/.ssh/authorized_keys"
       mode: 0644
       owner: oracle
@@ -191,7 +189,7 @@
       - cfengine
   - name: Copy grid private key into place
     copy:
-      src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-grid"
+      src: "{{ssh_tmpdir}}/{{cluster_name}}-grid"
       dest: "/home/grid/.ssh/id_dsa"
       mode: 0600
       owner: grid
@@ -201,7 +199,7 @@
       - cfengine
   - name: Copy grid public key into place
     copy:
-      src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-grid.pub"
+      src: "{{ssh_tmpdir}}/{{cluster_name}}-grid.pub"
       dest: "/home/grid/.ssh/id_dsa.pub"
       mode: 0644
       owner: grid
@@ -211,7 +209,7 @@
       - cfengine
   - name: Copy grid public key into auth keys
     copy:
-      src: "{{ssh_tmpdir}}/{{ssh_key_basename}}-grid.pub"
+      src: "{{ssh_tmpdir}}/{{cluster_name}}-grid.pub"
       dest: "/home/grid/.ssh/authorized_keys"
       mode: 0644
       owner: grid

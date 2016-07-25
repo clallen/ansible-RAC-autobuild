@@ -23,7 +23,7 @@ env_blocks: [
 "begin": "6C:9c",
 "end": "6C:9d",
 "size": "500" },
-{ "name": "AUTOBLD_ENV_OCR",
+{ "name": "{{cluster_name}}_OCR",
 "pool": "36",
 "ports": [ "CL1-B", "CL2-B" ],
 "begin": "6C:9e",

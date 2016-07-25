@@ -1,4 +1,5 @@
 horcminst: "6"
 ldom_name: "autobld1"
+cluster_name: "{{ldom_name | regex_replace('\\d?$', '')}}"
 public_pvid: "1427"
 rac_storage: [ "AUTOBLD_ENV_DATA", "AUTOBLD_ENV_FRA", "AUTOBLD_ENV_OCR" ]
