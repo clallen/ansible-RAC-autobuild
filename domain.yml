@@ -3,6 +3,7 @@
 #  gather_facts: true
 
   vars:
+    ldom_name: "{{inventory_hostname | regex_replace('-mgmt$', '')}}"
     oracle_uid: 10
     grid_uid: 61001
     oinstall_gid: 111
