@@ -38,7 +38,7 @@
     register: check_output
     delegate_to: "{{groups['aiserver'][0]}}"
   - name: Add client profile to AI server
-    shell: "/usr/bin/aiconf -H {{mgmt_hostname}} -d {{dns_domain}} -i {{mgmt_ip}} -e {{ldm_output.stdout}} -n {{ai_service}} -c {{cfengine_class}} {{build_profiles}}"
+    shell: "/usr/bin/aiconf -H {{mgmt_hostname}} -d {{dns_domain}} -i {{mgmt_ip}} -e {{ldm_output.stdout}} -n {{ai_service}} -c {{cfengine_class}} {{aiconf_build_profiles}}"
     delegate_to: "{{groups['aiserver'][0]}}"
     when: check_output.rc == 1
   - name: Start domain

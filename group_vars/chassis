@@ -9,4 +9,4 @@ public_pvid: 1427
 ai_server_ip: 130.164.42.236
 ai_service: solaris-11_3-sru-9_4_0-sparc
 cfengine_class: dev
-build_profiles: "-b orarac -b pgo_dba -b pgc_pre_release"
+aiconf_build_profiles: "-b orarac -b pgo_dba -b pgc_pre_release"
