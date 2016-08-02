@@ -7,7 +7,7 @@
     oracle_uid: 10
     grid_uid: 61001
     oinstall_gid: 111
-    ssh_tmpdir: "{{lookup('env','HOME')}}/autobuild_ssh"
+    ssh_tmpdir: "/tmp/autobuild_ssh-{{cluster_name}}"
     zfs_home_dataset: rpool/apps/users
     domain: natinst.com
     patch_audit_file: /var/cfengine/etc/classes/last_patched
