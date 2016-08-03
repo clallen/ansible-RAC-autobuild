@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import re, platform
+import re, platform, subprocess
 
 DOCUMENTATION = """
 ---
@@ -19,12 +19,6 @@ options:
         type: C{str}
         description:
             - HORCM instance to use.
-    chassis:
-        required: true
-        type: C{list}
-        description:
-            - Hosts to which the block will be shared.  Only required for
-              create.
     blocks:
         required: true
         type: C{list} of C{dict}
@@ -41,6 +35,7 @@ options:
               LDEV (e.g. "15:6F").
             - ports: List of ports to share through (e.g. CL1-B, CL2-B, CL7-F, CL8-F).
             - pool: Storage pool in which the block will be created.
+            - chassis: List of chassis to share to.
 """
 
 
@@ -54,10 +49,10 @@ class LDEVBlock:
     GS6_CMD_DEV = "c0t60060E80166BCD0000016BCD000026FFd0s2"
     GS7_CMD_DEV = "c0t60060E8016--bogus--a6FFd0s2"
 
-    def __init__(self, module, name, begin, end, size, ports, pool):
+    def __init__(self, module, name, begin, end, size, ports, pool, chassis):
         self.module = module
         self.horcm = self.module.params["horcm"]
-        self.chassis = self.module.params["chassis"]
+        self.chassis = chassis
         self.pool = pool
         self.ports = ports
         self.name = name
@@ -169,9 +164,13 @@ class LDEVBlock:
         Return type "devices": { "ldevname1": "c0t60060E80166BCD0000016BCD00006DE0d0s2" }
         Return type "ldev": { "ldevname1": "15:6C" }
         """
-        lines = self.module.run_command("/usr/bin/ls /dev/rdsk/* | "+
-                                "/HORCM/usr/bin/inqraid -fnx -CLI | "+
-                                "/usr/bin/grep "+blockname, check_rc = True)[1]
+        try:
+            lines = subprocess.check_output("/usr/bin/ls /dev/rdsk/* | "+
+                                            "/HORCM/usr/bin/inqraid -fnx -CLI | "+
+                                            "/usr/bin/grep "+blockname, shell = True)
+        except subprocess.CalledProcessError as e:
+            module.fail_json(msg = "Unable to scan for backend devices: "+
+                             e.output)
         result = dict()
         if return_type == "device":
             for line in lines.splitlines():
@@ -230,7 +229,6 @@ def main():
     module = AnsibleModule(
         argument_spec = dict(
             horcm = dict(required = True, type = "str"),
-            chassis = dict(type = "list"),
             blocks = dict(type = "list")
         ),
         supports_check_mode = True
@@ -244,7 +242,7 @@ def main():
 
     for block in module.params["blocks"]:
         ldb = LDEVBlock(module, block["name"], block["begin"], block["end"],
-                        block["size"], block["ports"], block["pool"])
+                        block["size"], block["ports"], block["pool"], block["chassis"])
         ldb.create()
         ldb.share()
 
