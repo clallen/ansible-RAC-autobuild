@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import subprocess, re, platform
+import re, platform
 
 DOCUMENTATION = """
 ---
@@ -52,7 +52,7 @@ class LDEVBlock:
     GS7_SERIAL = 12345
     GS5_CMD_DEV = "c0t60060E801604710000010471000025FFd0s2"
     GS6_CMD_DEV = "c0t60060E80166BCD0000016BCD000026FFd0s2"
-    GS7_CMD_DEV = "c0t60060E80166fddsseeewqwwefassa6FFd0s2"
+    GS7_CMD_DEV = "c0t60060E8016--bogus--a6FFd0s2"
 
     def __init__(self, module, name, begin, end, size, ports, pool):
         self.module = module
@@ -169,13 +169,9 @@ class LDEVBlock:
         Return type "devices": { "ldevname1": "c0t60060E80166BCD0000016BCD00006DE0d0s2" }
         Return type "ldev": { "ldevname1": "15:6C" }
         """
-        try:
-            lines = subprocess.check_output("/usr/bin/ls /dev/rdsk/* | "+
-                                    "/HORCM/usr/bin/inqraid -fnx -CLI | "+
-                                    "/usr/bin/grep "+blockname, shell = True)
-        except subprocess.CalledProcessError as e:
-            module.fail_json(msg = "Unable to scan for backend devices: "+
-                             e.output)
+        lines = self.module.run_command("/usr/bin/ls /dev/rdsk/* | "+
+                                "/HORCM/usr/bin/inqraid -fnx -CLI | "+
+                                "/usr/bin/grep "+blockname, check_rc = True)[1]
         result = dict()
         if return_type == "device":
             for line in lines.splitlines():
@@ -221,21 +217,14 @@ class LDEVBlock:
             if self.module.check_mode:
                 self.msg.append(self.RAIDCOM+" "+cmd)
             else:
-                output = self._run_cmd(cmd).strip()
+                output = self._run_cmd(cmd)
                 self.msg.append(cmd)
                 if len(output) != 0:
                     self.msg.append(output)
 
     def _run_cmd(self, cmd):
-        try:
-            return subprocess.check_output(self.RAIDCOM+" "+cmd, shell = True)
-        except subprocess.CalledProcessError as e:
-            if re.match(r"^lock", cmd):
-                output = subprocess.check_output(self.RAIDCOM+" get resource -I"+
-                                                 self.horcm, shell = True).strip()
-                self.msg.append("Unable to acquire lock, frame is locked by:")
-                self.msg.append(output)
-            self.module.fail_json(msg = "Command '"+e.cmd+"' failed: "+e.output)
+        stdout = self.module.run_command(self.RAIDCOM+" "+cmd, check_rc = True)[1]
+        return stdout.strip()
 
 def main():
     module = AnsibleModule(
