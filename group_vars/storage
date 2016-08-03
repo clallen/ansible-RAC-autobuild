@@ -16,7 +16,6 @@ os_blocks: [
 "chassis": [ "todd" ] } ]
 
 # RAC envs
-env_chassis: [ "todd" ]
 env_blocks: [
 { "name": "AUTOBLD_ENV_DATA",
 "pool": "36",
