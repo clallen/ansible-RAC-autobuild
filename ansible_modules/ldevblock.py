@@ -240,13 +240,16 @@ def main():
     if float(platform.version()) < 10:
         module.fail_json(msg = "This module requires Solaris 10 or higher")
 
+    exit_msg = []
+
     for block in module.params["blocks"]:
         ldb = LDEVBlock(module, block["name"], block["begin"], block["end"],
                         block["size"], block["ports"], block["pool"], block["chassis"])
         ldb.create()
         ldb.share()
+        exit_msg.extend(ldb.msg)
 
-    module.exit_json(changed = ldb.changed, msg = " | ".join(ldb.msg))
+    module.exit_json(changed = ldb.changed, msg = " | ".join(exit_msg))
 
 
 from ansible.module_utils.basic import *
