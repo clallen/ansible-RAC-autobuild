@@ -1,12 +1,5 @@
 # RAC node OS
 os_blocks: [
-{ "name": "autobld1_OS",
-"pool": "36",
-"ports": [ "CL1-B", "CL2-B" ],
-"begin": "6C:48",
-"end": "6C:4b",
-"size": "50",
-"chassis": [ "rod" ] },
 { "name": "autobld2_OS",
 "pool": "36",
 "ports": [ "CL1-B", "CL2-B" ],
@@ -23,21 +16,21 @@ env_blocks: [
 "begin": "6C:94",
 "end": "6C:9b",
 "size": "1024",
-"chassis": [ "rod", "todd" ] },
+"chassis": [ "todd" ] },
 { "name": "AUTOBLD_ENV_FRA",
 "pool": "36",
 "ports": [ "CL1-B", "CL2-B" ],
 "begin": "6C:9c",
 "end": "6C:9d",
 "size": "500",
-"chassis": [ "rod", "todd" ] },
+"chassis": [ "todd" ] },
 { "name": "autobld_OCR",
 "pool": "36",
 "ports": [ "CL1-B", "CL2-B" ],
 "begin": "6C:9e",
 "end": "6C:9f",
 "size": "100",
-"chassis": [ "rod", "todd" ] } ]
+"chassis": [ "todd" ] } ]
 
 
 # notes:

@@ -169,8 +169,8 @@ class LDEVBlock:
                                             "/HORCM/usr/bin/inqraid -fnx -CLI | "+
                                             "/usr/bin/grep "+blockname, shell = True)
         except subprocess.CalledProcessError as e:
-            module.fail_json(msg = "Unable to scan for backend devices: "+
-                             e.output)
+            print "Unable to scan for backend devices: "+str(e)
+            exit(1)
         result = dict()
         if return_type == "device":
             for line in lines.splitlines():
