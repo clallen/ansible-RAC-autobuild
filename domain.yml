@@ -49,7 +49,7 @@
       - net
       - cfengine
   - name: Wait for gateway switchover
-    wait_for: timeout=5
+    wait_for: timeout=10
     tags:
       - net
       - cfengine
@@ -245,6 +245,14 @@
     horcm_setup:
       horcminst: "horcm{{horcminst}}"
       disk_groups: "{{rac_storage}}"
+    when: inventory_hostname | match(".*1-mgmt$")
+    tags:
+      - horcm
+      - cfengine
+  - name: Enable horcm service
+    service:
+      name: "horcm{{horcminst}}"
+      enabled: yes
     when: inventory_hostname | match(".*1-mgmt$")
     tags:
       - horcm
