@@ -37,21 +37,21 @@ def main():
     disk_groups = module.params["disk_groups"]
 
     # add service instance
-    rc, stdout, stderr = module.run_command("/usr/sbin/svccfg -s site/horcm:"+horcminst+" list")
+    stdout = module.run_command("/usr/sbin/svccfg -s site/horcm:"+horcminst+" list")[1]
     if stdout.strip() != ":properties":
         msg.append("Adding "+horcminst+" service instance")
         if not module.check_mode:
             module.run_command("/usr/sbin/svccfg -s site/horcm add "+horcminst, check_rc = True)
             changed = True
     # add property groups
-    rc, stdout, stderr = module.run_command("/usr/sbin/svccfg -s site/horcm:"+horcminst+" listpg")
+    stdout = module.run_command("/usr/sbin/svccfg -s site/horcm:"+horcminst+" listpg")[1]
     if stdout.strip() == "":
         msg.append("Adding "+horcminst+" property groups")
         if not module.check_mode:
             module.run_command("/usr/sbin/svccfg -s site/horcm:"+horcminst+" addpg general framework", check_rc = True)
             changed = True
     # add general/enabled property value
-    rc, stdout, stderr = module.run_command("/usr/sbin/svccfg -s site/horcm:"+horcminst+" listprop general/enabled")
+    stdout = module.run_command("/usr/sbin/svccfg -s site/horcm:"+horcminst+" listprop general/enabled")[1]
     if stdout.strip() == "":
         msg.append("Adding "+horcminst+" general/enabled property value")
         if not module.check_mode:
