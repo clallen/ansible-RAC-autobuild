@@ -2,7 +2,7 @@
 - hosts: storage
 
   tasks:
-  - name: Setup {{ldom_name}} OS storage
+  - name: Setup OS storage
     ldevblock:
       horcm: "{{horcminst}}"
       chassis: "{{os_chassis}}"
