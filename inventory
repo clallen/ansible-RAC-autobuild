@@ -2,7 +2,8 @@
 skeeter
 
 [chassis]
-todd
+rod ldom_name=autobld1
+todd ldom_name=autobld2
 
 [domain]
 autobld1-mgmt

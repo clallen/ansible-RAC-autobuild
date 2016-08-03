@@ -5,14 +5,12 @@
   - name: Setup OS storage
     ldevblock:
       horcm: "{{horcminst}}"
-      chassis: "{{os_chassis}}"
       blocks: "{{os_blocks}}"
     tags:
       - os
   - name: Setup RAC env storage
     ldevblock:
       horcm: "{{horcminst}}"
-      chassis: "{{env_chassis}}"
       blocks: "{{env_blocks}}"
     tags:
       - env
