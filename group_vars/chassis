@@ -1,7 +1,6 @@
 # domain-specific
 cores: 1
 memory: 4
-rac_dbvers: 12.2.1.3
 public_pvid: 1427
 
 # automated installer variables

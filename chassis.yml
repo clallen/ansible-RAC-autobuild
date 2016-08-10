@@ -26,7 +26,6 @@
         "boot-device": "net",
         "boot-file": "- install"
         }
-      rac_dbvers: "{{rac_dbvers}}"
       rac_storage: "{{rac_storage}}"
       vnets: "{{vnets}}"
   - name: Get mgmt MAC address

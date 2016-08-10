@@ -2,9 +2,8 @@
 
 import platform, subprocess, sys, re
 sys.path.append("/opt/local/scripts/production/ovm/lib/python2.7/site-packages")
-sys.path.append("/home/clallen/work/autobuild/ansible_modules")
 from agent.lib.ldoms.ldmxml import *
-from ldevblock import LDEVBlock
+from ansible.ldevblock import LDEVBlock
 
 DOCUMENTATION = """
 ---
@@ -98,13 +97,6 @@ options:
             - * pvid: Port VLAN-ID.  Specifies the VLAN to which the virtual 
               network device needs to be a member, in untagged mode.
               Type: C{int}
-    rac_dbvers:
-        required: false
-        type: C{string}
-        description:
-            - The RAC database version (e.g. 12.1.0.2).  This will be used to 
-              name the "dbdisk" and "gidisk" OS vdisks.
-              IF THIS OPTION IS PRESENT THE "rac_storage" OPTION MUST ALSO BE PRESENT.
     rac_storage:
         required: false
         type: C{list}
@@ -116,8 +108,6 @@ options:
               and the storage device nodes must already exist and be shared to
               the target service domains.  It will usually correspond to a block
               of LDEVs (DATA, FRA, OCR, etc).
-              IF THIS OPTION IS PRESENT THE "rac_dbvers" OPTION MUST ALSO BE
-              PRESENT.
 """
 
 EXAMPLES = """
@@ -177,7 +167,6 @@ solaris_ldom:
     name: "{{ldom_name}}"
     cores: 2
     memory: 16
-    rac_dbvers: "11.2.0.4"
     rac_storage: [ "DEV_ENV_1", "TEST_ENV_2" ]
 
 # Change properties of an existing domain (state stays the same if not
@@ -202,7 +191,6 @@ class LDOM:
         self.domain_vars = self.module.params["domain_vars"]
         self.vdisks = self.module.params["vdisks"]
         self.vnets = self.module.params["vnets"]
-        self.rac_dbvers = self.module.params["rac_dbvers"]
         self.rac_storage = self.module.params["rac_storage"]
 
         self.changed = False
@@ -375,13 +363,13 @@ class LDOM:
                     "id": 1,
                     "backend": "/dev/dsk/"+devices[self.name+"_OS_02"],
                     "mpgroup": self.name+"-appdisk0" },
-                    { "vdisk": "gidisk_"+self.rac_dbvers,
+                    { "vdisk": "gidisk0",
                     "vds": "primary-vds"+self.vds_id,
                     "volume": self.name+"-gidisk0",
                     "id": 2,
                     "backend": "/dev/dsk/"+devices[self.name+"_OS_03"],
                     "mpgroup": self.name+"-gidisk0" },
-                    { "vdisk": "dbdisk_"+self.rac_dbvers,
+                    { "vdisk": "dbdisk0",
                     "vds": "primary-vds"+self.vds_id,
                     "volume": self.name+"-dbdisk0",
                     "id": 3,
@@ -407,13 +395,13 @@ class LDOM:
                     "id": 1,
                     "backend": "/dev/dsk/"+devices[self.name+"_OS_02"],
                     "mpgroup": self.name+"-appdisk0" },
-                    { "vdisk": "gidisk_"+self.rac_dbvers,
+                    { "vdisk": "gidisk0",
                     "vds": "secondary-vds"+self.vds_id,
                     "volume": self.name+"-gidisk0",
                     "id": 2,
                     "backend": "/dev/dsk/"+devices[self.name+"_OS_03"],
                     "mpgroup": self.name+"-gidisk0" },
-                    { "vdisk": "dbdisk_"+self.rac_dbvers,
+                    { "vdisk": "dbdisk0",
                     "vds": "secondary-vds"+self.vds_id,
                     "volume": self.name+"-dbdisk0",
                     "id": 3,
@@ -540,7 +528,6 @@ def main():
             domain_vars = dict(default = None, type = "dict"),
             vdisks = dict(default = None, type = "list"),
             vnets = dict(default = None, type = "list"),
-            rac_dbvers = dict(default = None, type = "str"),
             rac_storage = dict(default = None, type = "list"),
             state = dict(default = "same", choices = ["same", "inactive",
                                                       "bound", "active",
@@ -575,7 +562,7 @@ def main():
         ldom.set_vdisks()
     if ldom.vnets is not None:
         ldom.set_vnets()
-    if ldom.rac_dbvers is not None and ldom.rac_storage is not None:
+    if ldom.rac_storage is not None:
         try:
             # run cfgadm on primary and secondary service domains
             subprocess.check_call(["/usr/sbin/cfgadm", "-al"])
