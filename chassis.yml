@@ -30,16 +30,16 @@
       vnets: "{{vnets}}"
   - name: Get mgmt MAC address
     shell: "/usr/sbin/ldm list -p -o net {{ldom_name}}|/usr/bin/grep mgmt|/usr/bin/awk -F'|' '{print $5}'|/usr/bin/awk -F= '{print $2}'"
-    register: ldm_output
-  - name: Check AI server for existing client profile
-    shell: "/usr/sbin/installadm list -c | /usr/bin/grep {{ldm_output.stdout}}"
-    ignore_errors: yes
-    register: check_output
-    delegate_to: "{{groups['aiserver'][0]}}"
+    register: mac_addr
+#  - name: Check AI server for existing client profile
+#    shell: "/usr/sbin/installadm list -c | /usr/bin/grep {{mac_addr.stdout}}"
+#    ignore_errors: yes
+#    register: check_output
+#    delegate_to: "{{groups['aiserver'][0]}}"
   - name: Add client profile to AI server
-    shell: "/usr/bin/aiconf -H {{mgmt_hostname}} -d {{dns_domain}} -i {{mgmt_ip}} -e {{ldm_output.stdout}} -n {{ai_service}} -c {{cfengine_class}} {{aiconf_build_profiles}}"
+    shell: "/usr/bin/aiconf -H {{mgmt_hostname}} -d {{dns_domain}} -i {{mgmt_ip}} -e {{mac_addr.stdout}} -n {{ai_service}} -c {{cfengine_class}} {{aiconf_build_profiles}}"
     delegate_to: "{{groups['aiserver'][0]}}"
-    when: check_output.rc == 1
+#    when: check_output.rc == 1
   - name: Start domain
     solaris_ldom:
       state: active

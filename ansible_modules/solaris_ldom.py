@@ -2,8 +2,10 @@
 
 import platform, subprocess, sys, re
 sys.path.append("/opt/local/scripts/production/ovm/lib/python2.7/site-packages")
-from agent.lib.ldoms.ldmxml import *
-from ansible.ldevblock import LDEVBlock
+sys.path.append("/home/clallen/work/autobuild/ansible_modules")
+from agent.lib.ldoms.ldmxml import LDMXMLConnection
+from agent.lib.ldoms.ldmxml import LDMError
+from ldevblock import LDEVBlock
 
 DOCUMENTATION = """
 ---
