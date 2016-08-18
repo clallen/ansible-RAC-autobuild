@@ -4,7 +4,6 @@ memory: 4
 public_pvid: 1427
 
 # automated installer variables
-#ai_server_ip: 130.164.51.133
 ai_server_ip: 130.164.42.236
 ai_service: solaris-11_3-sru-9_4_0-sparc
 cfengine_class: dev

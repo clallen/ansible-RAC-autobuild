@@ -12,54 +12,21 @@
     patch_audit_file: /var/cfengine/etc/classes/last_patched
 
   tasks:
-    # repos
-  - name: Gather repo facts
-    site_facts:
-      types: [ "repos" ]
-    tags:
-      - repos
-  - name: Remove IP-based Solaris repo
-    pkg5_publisher:
-      name: solaris
-      state: absent
-    when: current_solaris_repo != solaris_repo
-    tags:
-      - repos
-  - name: Add name-based Solaris repo
-    pkg5_publisher:
-      name: solaris
-      origin: "{{solaris_repo}}"
-      sticky: true
-    when: current_solaris_repo != solaris_repo
-    tags:
-      - repos
-  - name: Add site repo
-    pkg5_publisher:
-      name: site
-      origin: "{{site_repo}}"
-      sticky: true
-    when: current_site_repo != site_repo
-    tags:
-      - repos
-
     # net
   - name: Setup RAC networks
     rac_net:
     tags:
       - net
-      - cfengine
   - name: Wait for gateway switchover
     local_action: wait_for timeout=15
     tags:
       - net
-      - cfengine
   - name: Add public IP to hosts file
     lineinfile:
       dest: /etc/inet/hosts
       line: "{{lookup('dig', ldom_name)}} {{ldom_name}} {{ldom_name}}.{{domain}}"
     tags:
       - net
-      - cfengine
   - name: Lookup private IPs
     set_fact:
       priv_lookup: "{{lookup('dig', item | regex_replace('-mgmt$', '-priv1'))}} {{item | regex_replace('-mgmt$', '-priv1')}}"
@@ -67,7 +34,6 @@
     register: privip_result
     tags:
       - net
-      - cfengine
   - name: Add private IPs to hosts file
     lineinfile:
       dest: /etc/inet/hosts
@@ -75,48 +41,6 @@
     with_items: "{{ privip_result.results | map(attribute='ansible_facts.priv_lookup') | list }}"
     tags:
       - net
-      - cfengine
-
-    # users
-  - name: Create oracle user
-    lineinfile:
-      dest: /etc/passwd
-      line: "oracle:x:{{oracle_uid}}:{{oinstall_gid}}:{{ldom_name}}-oracle:/home/oracle:/usr/bin/bash"
-    tags:
-      - users
-  - name: Create grid user
-    lineinfile:
-      dest: /etc/passwd
-      line: "grid:x:{{grid_uid}}:{{oinstall_gid}}:{{ldom_name}}-grid:/home/grid:/usr/bin/bash"
-    tags:
-      - users
-      - disk
-  - name: Create oracle ZFS homedir
-    zfs:
-      state: present
-      name: "{{zfs_home_dataset}}/oracle"
-    tags:
-      - users
-  - name: Create grid ZFS homedir
-    zfs:
-      state: present
-      name: "{{zfs_home_dataset}}/grid"
-    tags:
-      - users
-  - name: Set ownership on oracle homedir
-    file:
-      path: "/home/oracle"
-      owner: oracle
-      group: oinstall
-    tags:
-      - users
-  - name: Set ownership on grid homedir
-    file:
-      path: "/home/grid"
-      owner: grid
-      group: oinstall
-    tags:
-      - users
 
     # ssh
   - name: Create local SSH tmpdir
@@ -124,19 +48,16 @@
     become: False
     tags:
       - ssh
-      - cfengine
   - name: Create local oracle SSH keypair
     local_action: "command /usr/bin/ssh-keygen -q -t dsa -C 'oracle@{{cluster_name}}' -N '' -f {{ssh_tmpdir}}/{{cluster_name}}-oracle creates={{ssh_tmpdir}}/{{cluster_name}}-oracle"
     become: False
     tags:
       - ssh
-      - cfengine
   - name: Create local grid SSH keypair
     local_action: "command /usr/bin/ssh-keygen -q -t dsa -C 'grid@{{cluster_name}}' -N '' -f {{ssh_tmpdir}}/{{cluster_name}}-grid creates={{ssh_tmpdir}}/{{cluster_name}}-grid"
     become: False
     tags:
       - ssh
-      - cfengine
   - name: Create oracle SSH dir
     file:
       state: directory
@@ -146,7 +67,6 @@
       mode: 0700
     tags:
       - ssh
-      - cfengine
   - name: Create grid SSH dir
     file:
       state: directory
@@ -156,7 +76,6 @@
       mode: 0700
     tags:
       - ssh
-      - cfengine
   - name: Copy oracle private key into place
     copy:
       src: "{{ssh_tmpdir}}/{{cluster_name}}-oracle"
@@ -166,7 +85,6 @@
       group: oinstall
     tags:
       - ssh
-      - cfengine
   - name: Copy oracle public key into place
     copy:
       src: "{{ssh_tmpdir}}/{{cluster_name}}-oracle.pub"
@@ -176,7 +94,6 @@
       group: oinstall
     tags:
       - ssh
-      - cfengine
   - name: Copy oracle public key into auth keys
     copy:
       src: "{{ssh_tmpdir}}/{{cluster_name}}-oracle.pub"
@@ -186,7 +103,6 @@
       group: oinstall
     tags:
       - ssh
-      - cfengine
   - name: Copy grid private key into place
     copy:
       src: "{{ssh_tmpdir}}/{{cluster_name}}-grid"
@@ -196,7 +112,6 @@
       group: oinstall
     tags:
       - ssh
-      - cfengine
   - name: Copy grid public key into place
     copy:
       src: "{{ssh_tmpdir}}/{{cluster_name}}-grid.pub"
@@ -206,7 +121,6 @@
       group: oinstall
     tags:
       - ssh
-      - cfengine
   - name: Copy grid public key into auth keys
     copy:
       src: "{{ssh_tmpdir}}/{{cluster_name}}-grid.pub"
@@ -216,7 +130,6 @@
       group: oinstall
     tags:
       - ssh
-      - cfengine
   - name: SSH to each cluster node
     shell: "/usr/bin/sudo -u {{item[0]}} /usr/bin/ssh -o 'StrictHostkeyChecking no' -o 'BatchMode yes' {{item[1] | regex_replace('-mgmt$', '')}} 'exit'"
     with_nested:
@@ -224,14 +137,12 @@
       - "{{groups['domain']}}"
     tags:
       - ssh
-      - cfengine
 
     # disk
   - name: Setup GRID disks
     grid_disk:
     tags:
       - disk
-      - cfengine
   
     # horcm
   - name: Install horcm (node 1 only)
@@ -240,7 +151,6 @@
     tags:
       - horcm
       - pkgs
-      - cfengine
   - name: Add horcm {{horcminst}} service instance (node 1 only)
     horcm_setup:
       horcminst: "horcm{{horcminst}}"
@@ -248,7 +158,6 @@
     when: inventory_hostname | match(".*1-mgmt$")
     tags:
       - horcm
-      - cfengine
   - name: Enable horcm service
     service:
       name: "horcm{{horcminst}}"
@@ -256,48 +165,12 @@
     when: inventory_hostname | match(".*1-mgmt$")
     tags:
       - horcm
-      - cfengine
-
-    # salt
-  - name: Install salt
-    pkg5: name=salt
-    tags:
-      - salt
-      - pkgs
-  - name: Import salt manifests
-    service:
-      name: manifest-import
-      state: restarted
-    tags:
-      - salt
-  - name: Add Salt master to /etc/hosts
-    lineinfile:
-      dest: /etc/hosts
-      line: "{{salt_master_ip}}	salt"
-    tags:
-      - salt
-  - name: Enable Salt minion
-    service:
-      name: salt-minion
-      enabled: yes
-    tags:
-      - salt
-
-    # pkgs
-  - name: Install extra packages
-    pkg5:
-      name:
-        - ucb
-        - vim
-    tags:
-      - pkgs
 
     # patch audit
   - name: Get date/time for patch audit file
     setup: filter=ansible_date_time gather_subset=!hardware,!network,!virtual,!ohai,!facter
     tags:
       - patchdb
-      - cfengine
   - name: Set patch audit file
     replace:
       dest: "{{patch_audit_file}}"
@@ -305,6 +178,5 @@
       replace: "{{patch_audit_rev}} Patching completed:\n{{ansible_date_time['date']}} {{ansible_date_time['time']}}"
     tags:
       - patchdb
-      - cfengine
 
 # vim: tabstop=2 shiftwidth=2
