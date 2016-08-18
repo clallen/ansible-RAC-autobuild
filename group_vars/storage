@@ -1,5 +1,12 @@
 # RAC node OS
 os_blocks: [
+{ "name": "autobld1_OS",
+"pool": "36",
+"ports": [ "CL1-B", "CL2-B" ],
+"begin": "6C:48",
+"end": "6C:4b",
+"size": "50",
+"chassis": [ "todd" ] },
 { "name": "autobld2_OS",
 "pool": "36",
 "ports": [ "CL1-B", "CL2-B" ],
