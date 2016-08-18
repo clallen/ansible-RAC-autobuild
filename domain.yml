@@ -49,7 +49,7 @@
       - net
       - cfengine
   - name: Wait for gateway switchover
-    wait_for: timeout=10
+    local_action: wait_for timeout=15
     tags:
       - net
       - cfengine
@@ -126,13 +126,13 @@
       - ssh
       - cfengine
   - name: Create local oracle SSH keypair
-    local_action: "command /usr/bin/ssh-keygen -t dsa -C 'oracle@{{cluster_name}}' -N '' -f {{ssh_tmpdir}}/{{cluster_name}}-oracle creates={{ssh_tmpdir}}/{{cluster_name}}-oracle"
+    local_action: "command /usr/bin/ssh-keygen -q -t dsa -C 'oracle@{{cluster_name}}' -N '' -f {{ssh_tmpdir}}/{{cluster_name}}-oracle creates={{ssh_tmpdir}}/{{cluster_name}}-oracle"
     become: False
     tags:
       - ssh
       - cfengine
   - name: Create local grid SSH keypair
-    local_action: "command /usr/bin/ssh-keygen -t dsa -C 'grid@{{cluster_name}}' -N '' -f {{ssh_tmpdir}}/{{cluster_name}}-grid creates={{ssh_tmpdir}}/{{cluster_name}}-grid"
+    local_action: "command /usr/bin/ssh-keygen -q -t dsa -C 'grid@{{cluster_name}}' -N '' -f {{ssh_tmpdir}}/{{cluster_name}}-grid creates={{ssh_tmpdir}}/{{cluster_name}}-grid"
     become: False
     tags:
       - ssh
