@@ -110,6 +110,11 @@ options:
               and the storage device nodes must already exist and be shared to
               the target service domains.  It will usually correspond to a block
               of LDEVs (DATA, FRA, OCR, etc).
+    horcminst:
+        required: false
+        type: C{int}
+        description:
+            - The HORCM instance (used only with the "rac_storage" option).
 """
 
 EXAMPLES = """
@@ -170,6 +175,7 @@ solaris_ldom:
     cores: 2
     memory: 16
     rac_storage: [ "DEV_ENV_1", "TEST_ENV_2" ]
+    horcminst: 5
 
 # Change properties of an existing domain (state stays the same if not
 # specified)
@@ -194,6 +200,7 @@ class LDOM:
         self.vdisks = self.module.params["vdisks"]
         self.vnets = self.module.params["vnets"]
         self.rac_storage = self.module.params["rac_storage"]
+        self.horcminst = self.module.params["horcminst"]
 
         self.changed = False
         self.msg = []
@@ -272,31 +279,31 @@ class LDOM:
                 self.msg.append("Set variable '"+varname+"' to: '"+varval+"'")
 
     def set_vdisks(self):
-        failed = False
+        missing_cfg = False
         for vdisk in self.vdisks:
             if vdisk["vdisk"] is None:
                 self.msg.append("COULD NOT ADD VDISK - VDISK NAME REQUIRED")
-                failed = True
+                missing_cfg = True
                 break
             if vdisk["vds"] is None:
                 self.msg.append("COULD NOT ADD VDISK - VDS REQUIRED")
-                failed = True
+                missing_cfg = True
                 break
             if vdisk["backend"] is None:
                 self.msg.append("COULD NOT ADD VDISK - BACKEND REQUIRED")
-                failed = True
+                missing_cfg = True
                 break
             if vdisk["volume"] is None:
                 self.msg.append("COULD NOT ADD VDISK - VOLUME REQUIRED")
-                failed = True
+                missing_cfg = True
                 break
             if vdisk["id"] is None:
                 self.msg.append("COULD NOT ADD VDISK - ID REQUIRED")
-                failed = True
+                missing_cfg = True
                 break
             if vdisk["mpgroup"] is None:
                 self.msg.append("COULD NOT ADD VDISK - MPGROUP REQUIRED")
-                failed = True
+                missing_cfg = True
                 break
             if not self.module.check_mode:
                 try:
@@ -308,42 +315,47 @@ class LDOM:
                         self.lxc.add_vdisk(self.name, vdisk["vdisk"], vdisk["vds"],
                                            volume=vdisk["volume"], id=vdisk["id"])
                 except LDMError as e:
-                    self.module.fail_json(msg = str(e))
+                    if re.search("already exists", str(e)) is None:
+                        self.module.fail_json(msg = str(e))
+                    else:
+                        self.msg.append(str(e))
                 else:
                     self.changed = True
-        if not failed:
+        if not missing_cfg:
             for vdisk in self.vdisks:
                 self.msg.append("Added vdisk: "+vdisk["vdisk"])
 
     def set_vnets(self):
-        failed = False
+        missing_cfg = False
         for vnet in self.vnets:
             if vnet["vnet"] is None:
                 self.msg.append("COULD NOT ADD VNET - VNET NAME REQUIRED")
-                failed = True
+                missing_cfg = True
                 break
             if vnet["vswitch"] is None:
                 self.msg.append("COULD NOT ADD VNET - VSWITCH REQUIRED")
-                failed = True
+                missing_cfg = True
                 break
             if vnet["pvid"] is None:
                 self.msg.append("COULD NOT ADD VNET - PVID REQUIRED")
-                failed = True
+                missing_cfg = True
                 break
             if vnet["id"] is None:
                 self.msg.append("COULD NOT ADD VNET - ID REQUIRED")
-                failed = True
+                missing_cfg = True
                 break
             if not self.module.check_mode:
                 try:
                     self.lxc.add_vnet(self.name, vnet["vnet"], vnet["vswitch"],
                                       pvid = vnet["pvid"], id = vnet["id"])
                 except LDMError as e:
-                    self.msg.append("Unable to set vnets: "+str(e))
-                    return
+                    if re.search("already exists", str(e)) is None:
+                        self.module.fail_json(msg = str(e))
+                    else:
+                        self.msg.append(str(e))
                 else:
                     self.changed = True
-        if not failed:
+        if not missing_cfg:
             for vnet in self.vnets:
                 self.msg.append("Added vnet: "+vnet["vnet"])
 
@@ -382,7 +394,7 @@ class LDOM:
                     "volume": self.name+"-cmd0",
                     "id": 99,
                     "backend": "/dev/dsk/"+
-                    LDEVBlock.get_cmd_device(devices[self.name+"_OS_01"]),
+                    LDEVBlock.get_cmd_device(platform.node(), self.horcminst),
                     "mpgroup": self.name+"-cmd0" },
                     # secondary
                     { "vdisk": "rootdisk0",
@@ -414,7 +426,7 @@ class LDOM:
                     "volume": self.name+"-cmd0",
                     "id": 99,
                     "backend": "/dev/dsk/"+
-                    LDEVBlock.get_cmd_device(devices[self.name+"_OS_01"]),
+                    LDEVBlock.get_cmd_device(platform.node(), self.horcminst),
                     "mpgroup": self.name+"-cmd0" }
                 ]
             except KeyError as e:
@@ -531,6 +543,7 @@ def main():
             vdisks = dict(default = None, type = "list"),
             vnets = dict(default = None, type = "list"),
             rac_storage = dict(default = None, type = "list"),
+            horcminst = dict(default = None, type = "int"),
             state = dict(default = "same", choices = ["same", "inactive",
                                                       "bound", "active",
                                                       "deleted"],

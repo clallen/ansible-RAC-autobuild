@@ -153,7 +153,7 @@
       - pkgs
   - name: Add horcm {{horcminst}} service instance (node 1 only)
     horcm_setup:
-      horcminst: "horcm{{horcminst}}"
+      horcminst: "{{horcminst}}"
       disk_groups: "{{rac_storage}}"
     when: inventory_hostname | match(".*1-mgmt$")
     tags:

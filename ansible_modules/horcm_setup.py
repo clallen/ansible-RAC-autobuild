@@ -24,7 +24,7 @@ SI_HOST = "boxmgr"
 def main():
     module = AnsibleModule(
         argument_spec = dict(
-            horcminst = dict(required = True, type = "str"),
+            horcminst = dict(required = True, type = "int"),
             disk_groups = dict(required = True, type = "list")
         ),
         supports_check_mode = True
@@ -34,28 +34,29 @@ def main():
     msg = []
 
     horcminst = module.params["horcminst"]
+    horcminst_str = "horcm"+str(horcminst)
     disk_groups = module.params["disk_groups"]
 
     # add service instance
-    stdout = module.run_command("/usr/sbin/svccfg -s site/horcm:"+horcminst+" list")[1]
+    stdout = module.run_command("/usr/sbin/svccfg -s site/horcm:"+horcminst_str+" list")[1]
     if stdout.strip() != ":properties":
-        msg.append("Adding "+horcminst+" service instance")
+        msg.append("Adding "+horcminst_str+" service instance")
         if not module.check_mode:
-            module.run_command("/usr/sbin/svccfg -s site/horcm add "+horcminst, check_rc = True)
+            module.run_command("/usr/sbin/svccfg -s site/horcm add "+horcminst_str, check_rc = True)
             changed = True
     # add property groups
-    stdout = module.run_command("/usr/sbin/svccfg -s site/horcm:"+horcminst+" listpg")[1]
+    stdout = module.run_command("/usr/sbin/svccfg -s site/horcm:"+horcminst_str+" listpg")[1]
     if stdout.strip() == "":
-        msg.append("Adding "+horcminst+" property groups")
+        msg.append("Adding "+horcminst_str+" property groups")
         if not module.check_mode:
-            module.run_command("/usr/sbin/svccfg -s site/horcm:"+horcminst+" addpg general framework", check_rc = True)
+            module.run_command("/usr/sbin/svccfg -s site/horcm:"+horcminst_str+" addpg general framework", check_rc = True)
             changed = True
     # add general/enabled property value
-    stdout = module.run_command("/usr/sbin/svccfg -s site/horcm:"+horcminst+" listprop general/enabled")[1]
+    stdout = module.run_command("/usr/sbin/svccfg -s site/horcm:"+horcminst_str+" listprop general/enabled")[1]
     if stdout.strip() == "":
-        msg.append("Adding "+horcminst+" general/enabled property value")
+        msg.append("Adding "+horcminst_str+" general/enabled property value")
         if not module.check_mode:
-            module.run_command("/usr/sbin/svccfg -s site/horcm:"+horcminst+" addpropvalue general/enabled boolean: false", check_rc = True)
+            module.run_command("/usr/sbin/svccfg -s site/horcm:"+horcminst_str+" addpropvalue general/enabled boolean: false", check_rc = True)
             changed = True
 
     # populate template
@@ -67,9 +68,9 @@ def main():
         ldevs = LDEVBlock.hds_scan(disk_group, "ldev")
         for ldev_name in ldevs.iterkeys():
             ldev_lines.append(LDEV_COLUMNS_FORMAT.format(disk_group, ldev_name, serial, ldevs[ldev_name], "0"))
-        inst_lines.append(INST_COLUMNS_FORMAT.format(disk_group, SI_HOST, horcminst))
+        inst_lines.append(INST_COLUMNS_FORMAT.format(disk_group, SI_HOST, horcminst_str))
     horcm_conf_lines = HORCM_CONF_TEMPLATE.format("#ip_address", "service", "poll(10ms)", "timeout(10ms)",
-                                                  socket.gethostname().split(".")[0], horcminst, "1000", "3000",
+                                                  socket.gethostname().split(".")[0], horcminst_str, "1000", "3000",
                                                   serial,
                                                   "#dev_group", "dev_name", "Serial#", "CU:LDEV(LDEV#)", "MU#",
                                                   "\n".join(ldev_lines),
@@ -77,7 +78,7 @@ def main():
                                                   "\n".join(inst_lines))
 
     # write out the file
-    horcm_conf_file = "/etc/"+horcminst+".conf"
+    horcm_conf_file = "/etc/"+horcminst_str+".conf"
     if os.path.isfile(horcm_conf_file):
         msg.append("HORCM config file "+horcm_conf_file+" exists, not overwriting")
     else:
