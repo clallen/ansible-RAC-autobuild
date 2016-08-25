@@ -1,3 +1,3 @@
-horcminst: "6"
+horcminst: 6
 cluster_name: "{{ldom_name | regex_replace('\\d?$', '')}}"
-rac_storage: [ "AUTOBLD_ENV_DATA", "AUTOBLD_ENV_FRA", "autobld_OCR" ]
+rac_storage: [ "AUTOBLD_ENV_DATA", "AUTOBLD_ENV_FRA", "AUTOBLD_ENV_OCR" ]

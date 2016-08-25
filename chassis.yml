@@ -1,5 +1,6 @@
 ---
 - hosts: chassis
+  serial: 1
 
   vars:
     vnets: [ { "vnet": "mgmt0", "vswitch": "primary-vsw0", "id": "0", "pvid": "1" },
@@ -14,7 +15,7 @@
     dns_domain: natinst.com
 
   tasks:
-  - name: Setup domain {{ldom_name}} on {{inventory_hostname}}
+  - name: Create domain {{ldom_name}}
     solaris_ldom:
       state: bound
       name: "{{ldom_name}}"
@@ -28,10 +29,11 @@
         }
       rac_storage: "{{rac_storage}}"
       vnets: "{{vnets}}"
+      horcminst: "{{horcminst}}"
   - name: Get mgmt MAC address
-    shell: "/usr/sbin/ldm list -p -o net {{ldom_name}}|/usr/bin/grep mgmt|/usr/bin/awk -F'|' '{print $5}'|/usr/bin/awk -F= '{print $2}'"
+    shell: "/usr/sbin/ldm list -p -o net {{ldom_name}} | /usr/bin/grep mgmt | /usr/bin/awk -F'|' '{print $5}' | /usr/bin/awk -F= '{print $2}'"
     register: mac_addr
-  - name: Add client profile to AI server
+  - name: Add client to AI server
     shell: "/usr/bin/aiconf -H {{mgmt_hostname}} -d {{dns_domain}} -i {{mgmt_ip}} -e {{mac_addr.stdout}} -n {{ai_service}} -c {{cfengine_class}} {{aiconf_build_profiles}}"
     delegate_to: "{{groups['aiserver'][0]}}"
   - name: Start domain
@@ -39,7 +41,7 @@
       state: active
       name: "{{ldom_name}}"
   - name: Give domain time to boot
-    wait_for: timeout=10
+    local_action: wait_for timeout=10
   - name: Remove boot install flag
     solaris_ldom:
       name: "{{ldom_name}}"

@@ -347,7 +347,8 @@ class LDOM:
             if not self.module.check_mode:
                 try:
                     self.lxc.add_vnet(self.name, vnet["vnet"], vnet["vswitch"],
-                                      pvid = vnet["pvid"], id = vnet["id"])
+                                      pvid = vnet["pvid"], id = vnet["id"],
+                                      mtu = 1500)
                 except LDMError as e:
                     if re.search("already exists", str(e)) is None:
                         self.module.fail_json(msg = str(e))
@@ -394,7 +395,7 @@ class LDOM:
                     "volume": self.name+"-cmd0",
                     "id": 99,
                     "backend": "/dev/dsk/"+
-                    LDEVBlock.get_cmd_device(platform.node(), self.horcminst),
+                    LDEVBlock.get_cmd_device(self.horcminst),
                     "mpgroup": self.name+"-cmd0" },
                     # secondary
                     { "vdisk": "rootdisk0",
@@ -426,12 +427,11 @@ class LDOM:
                     "volume": self.name+"-cmd0",
                     "id": 99,
                     "backend": "/dev/dsk/"+
-                    LDEVBlock.get_cmd_device(platform.node(), self.horcminst),
+                    LDEVBlock.get_cmd_device(self.horcminst),
                     "mpgroup": self.name+"-cmd0" }
                 ]
             except KeyError as e:
-                self.module.fail_json(msg="Key error on device '"+e.args[0]+
-                                      "' when setting up OS disks")
+                self.module.fail_json(msg="KeyError setting up OS disks")
             self.set_vdisks()
 
     def setup_rac_env_disks(self):

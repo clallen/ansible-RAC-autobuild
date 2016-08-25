@@ -42,6 +42,9 @@ options:
 class LDEVBlock:
     RAIDCOM = "/HORCM/usr/bin/raidcom"
     TIERED = [ 15, 16 ]
+    SAN_DATA = { 5: { "horcm_serial": "66673", "hex_serial": "10471" },
+                 6: { "horcm_serial": "93133", "hex_serial": "16BCD" },
+                 7: { "horcm_serial": "350112", "hex_serial": "C3C0" } }
 
     def __init__(self, module, name, begin, end, size, ports, pool, chassis):
         self.module = module
@@ -127,22 +130,27 @@ class LDEVBlock:
 
     @staticmethod
     def get_serial(horcminst):
-        """ Return the decimal serial number of the storage frame for the given
-        HORCM instance """
-        #TODO: load in json file, return horcm_serial
-        pass
+        """ Return the decimal serial number of the storage frame for the given HORCM
+        instance """
+        return LDEVBlock.SAN_DATA[horcminst]["horcm_serial"]
 
     @staticmethod
-    def get_cmd_device(host, horcminst):
-        """ Return the command device for the storage frame for the given device
-        node string. """
-        #TODO: load in json file, get /dev/dsk list, re.search for hex_serial+"\w+"+host_cmd_dev+"d0s2$"
-        pass
+    def get_cmd_device(horcminst):
+        """ Return the command device for the given HORCM instance. """
+        hex_serial = LDEVBlock.SAN_DATA[horcminst]["hex_serial"]
+        try:
+            output = subprocess.check_output("/usr/bin/ls /dev/rdsk/* | "+
+                                            "/HORCM/usr/bin/inqraid -sort -CM -CLI | "+
+                                            "/usr/bin/grep "+hex_serial, shell = True)
+        except subprocess.CalledProcessError as e:
+            print "Unable to get command device: "+str(e)
+            exit(1)
+        return output.strip().split("/")[3]
 
     @staticmethod
     def hds_scan(blockname, return_type):
-        """ Returns a dictionary of LDEV names mapped to device ids, or mapped 
-        to LDEV ids, depending on C{return_type}.
+        """ Returns a dictionary of LDEV names mapped to device nodes or to LDEV ids,
+        depending on C{return_type}.
         args:
         - blockname: the LDEV name pattern to search
         - return_type: if "device", return device node names, if "ldev" return LDEV ids
