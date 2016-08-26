@@ -1,16 +1,6 @@
 ---
 - hosts: domain
 
-  vars:
-    ldom_name: "{{inventory_hostname | regex_replace('-mgmt$', '')}}"
-    oracle_uid: 10
-    grid_uid: 61001
-    oinstall_gid: 111
-    ssh_tmpdir: "/tmp/autobuild_ssh-{{cluster_name}}"
-    zfs_home_dataset: rpool/apps/users
-    domain: natinst.com
-    patch_audit_file: /var/cfengine/etc/classes/last_patched
-
   tasks:
     # net
   - name: Setup RAC networks
