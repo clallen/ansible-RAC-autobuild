@@ -323,6 +323,7 @@ class LDOM:
 
     def set_vnets(self):
         missing_cfg = False
+        mtu = 1500
         for vnet in self.vnets:
             if vnet["vnet"] is None:
                 self.msg.append("COULD NOT ADD VNET - VNET NAME REQUIRED")
@@ -340,9 +341,7 @@ class LDOM:
                 self.msg.append("COULD NOT ADD VNET - ID REQUIRED")
                 missing_cfg = True
                 break
-            if vnet["mtu"] is None:
-                mtu = 1500
-            else:
+            if "mtu" in vnet:
                 mtu = vnet["mtu"]
             if not self.module.check_mode:
                 try:
