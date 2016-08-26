@@ -99,6 +99,8 @@ options:
             - * pvid: Port VLAN-ID.  Specifies the VLAN to which the virtual 
               network device needs to be a member, in untagged mode.
               Type: C{int}
+              Optionally "mtu" may be specified.  If not it will default to
+              1500.  Type: C{int}
     rac_storage:
         required: false
         type: C{list}
@@ -160,14 +162,8 @@ solaris_ldom:
                 "backend": "/dev/zvol/dsk/rpool/ovm/images/{{ldom_name}}-app"
                 }
             ]
-    vnets: [
-                {
-                "vnet": "mgmt0",
-                "vswitch": "primary-vsw0",
-                "id": 0,
-                "pvid": 1
-                }
-           ]
+    vnets: [ { "vnet": "mgmt0", "vswitch": "primary-vsw0", "id": 0, "pvid": 1 },
+             { "vnet": "pubnet0", "vswitch": "primary-vsw1", "id": "1", "pvid": 10, "mtu": 9000 } ]
 
 # Create an Oracle RAC node:
 solaris_ldom:
@@ -344,11 +340,15 @@ class LDOM:
                 self.msg.append("COULD NOT ADD VNET - ID REQUIRED")
                 missing_cfg = True
                 break
+            if vnet["mtu"] is None:
+                mtu = 1500
+            else:
+                mtu = vnet["mtu"]
             if not self.module.check_mode:
                 try:
                     self.lxc.add_vnet(self.name, vnet["vnet"], vnet["vswitch"],
                                       pvid = vnet["pvid"], id = vnet["id"],
-                                      mtu = 1500)
+                                      mtu = mtu)
                 except LDMError as e:
                     if re.search("already exists", str(e)) is None:
                         self.module.fail_json(msg = str(e))
