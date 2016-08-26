@@ -1,19 +1,6 @@
 ---
-- hosts: chassis
-  serial: 1
-
-  vars:
-    vnets: [ { "vnet": "mgmt0", "vswitch": "primary-vsw0", "id": "0", "pvid": "1" },
-             { "vnet": "pubnet0", "vswitch": "primary-vsw1", "id": "1", "pvid": "{{public_pvid}}" },
-             { "vnet": "pubnet1", "vswitch": "primary-vsw1", "id": "2", "pvid": "{{public_pvid}}" },
-             { "vnet": "privnet0", "vswitch": "primary-vsw2", "id": "3", "pvid": "913" },
-             { "vnet": "privnet1", "vswitch": "primary-vsw2", "id": "4", "pvid": "913" } ]
-    mgmt_hostname: "{{ldom_name}}-mgmt"
-    mgmt_ip: "{{lookup('dig', mgmt_hostname)}}"
-    mgmt_gw: 130.164.28.1
-    mgmt_nm: 255.255.255.0
-    dns_domain: natinst.com
-
+- name: Create play
+  hosts: chassis
   tasks:
   - name: Create domain {{ldom_name}}
     solaris_ldom:
@@ -30,12 +17,21 @@
       rac_storage: "{{rac_storage}}"
       vnets: "{{vnets}}"
       horcminst: "{{horcminst}}"
+
+- name: AI play
+  hosts: chassis
+  serial: 1
+  tasks:
   - name: Get mgmt MAC address
     shell: "/usr/sbin/ldm list -p -o net {{ldom_name}} | /usr/bin/grep mgmt | /usr/bin/awk -F'|' '{print $5}' | /usr/bin/awk -F= '{print $2}'"
     register: mac_addr
   - name: Add client to AI server
     shell: "/usr/bin/aiconf -H {{mgmt_hostname}} -d {{dns_domain}} -i {{mgmt_ip}} -e {{mac_addr.stdout}} -n {{ai_service}} -c {{cfengine_class}} {{aiconf_build_profiles}}"
     delegate_to: "{{groups['aiserver'][0]}}"
+
+- name: Install play
+  hosts: chassis
+  tasks:
   - name: Start domain
     solaris_ldom:
       state: active
