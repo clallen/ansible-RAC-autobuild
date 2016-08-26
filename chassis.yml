@@ -1,8 +1,8 @@
 ---
-- name: Create play
+- name: Create
   hosts: chassis
   tasks:
-  - name: Create domain {{ldom_name}}
+  - name: Create domains
     solaris_ldom:
       state: bound
       name: "{{ldom_name}}"
@@ -18,7 +18,7 @@
       vnets: "{{vnets}}"
       horcminst: "{{horcminst}}"
 
-- name: AI play
+- name: AI
   hosts: chassis
   serial: 1
   tasks:
@@ -29,7 +29,7 @@
     shell: "/usr/bin/aiconf -H {{mgmt_hostname}} -d {{dns_domain}} -i {{mgmt_ip}} -e {{mac_addr.stdout}} -n {{ai_service}} -c {{cfengine_class}} {{aiconf_build_profiles}}"
     delegate_to: "{{groups['aiserver'][0]}}"
 
-- name: Install play
+- name: Install
   hosts: chassis
   tasks:
   - name: Start domain
