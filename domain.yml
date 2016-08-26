@@ -19,6 +19,7 @@
       - net
   - name: Wait for gateway switchover
     local_action: wait_for timeout=15
+    become: False
     tags:
       - net
   - name: Add public IP to hosts file
@@ -46,16 +47,19 @@
   - name: Create local SSH tmpdir
     local_action: file state=directory path="{{ssh_tmpdir}}" mode=0700
     become: False
+    run_once: True
     tags:
       - ssh
   - name: Create local oracle SSH keypair
     local_action: "command /usr/bin/ssh-keygen -q -t dsa -C 'oracle@{{cluster_name}}' -N '' -f {{ssh_tmpdir}}/{{cluster_name}}-oracle creates={{ssh_tmpdir}}/{{cluster_name}}-oracle"
     become: False
+    run_once: True
     tags:
       - ssh
   - name: Create local grid SSH keypair
     local_action: "command /usr/bin/ssh-keygen -q -t dsa -C 'grid@{{cluster_name}}' -N '' -f {{ssh_tmpdir}}/{{cluster_name}}-grid creates={{ssh_tmpdir}}/{{cluster_name}}-grid"
     become: False
+    run_once: True
     tags:
       - ssh
   - name: Create oracle SSH dir
