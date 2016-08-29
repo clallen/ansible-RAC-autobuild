@@ -36,8 +36,8 @@
     solaris_ldom:
       state: active
       name: "{{ldom_name}}"
-  - name: Give domain time to boot
-    local_action: wait_for timeout=10
+  - name: Wait for domain to boot
+    local_action: wait_for timeout=5
     become: False
   - name: Remove boot install flag
     solaris_ldom:
