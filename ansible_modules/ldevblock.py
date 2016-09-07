@@ -33,9 +33,9 @@ options:
               LDEV (e.g. "15:60").
             - end: Ending index of the block.  This is the index of the last
               LDEV (e.g. "15:6F").
-            - ports: List of ports to share through (e.g. CL1-B, CL2-B, CL7-F, CL8-F).
+            - ports: C{list} of ports to share through (e.g. CL1-B, CL2-B, CL7-F, CL8-F).
             - pool: Storage pool in which the block will be created.
-            - chassis: List of chassis to share to.
+            - chassis: C{list} of chassis to share to.
 """
 
 
