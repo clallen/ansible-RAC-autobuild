@@ -139,24 +139,21 @@
       - disk
   
     # horcm
-  - name: Install horcm (node 1 only)
+  - name: Install horcm
     pkg5: name=horcm
-    when: inventory_hostname | match(".*1-mgmt$")
     tags:
       - horcm
       - pkgs
-  - name: Add horcm {{horcminst}} service instance (node 1 only)
+  - name: Add horcm {{horcminst}} service instance and config file
     horcm_setup:
       horcminst: "{{horcminst}}"
       disk_groups: "{{rac_storage}}"
-    when: inventory_hostname | match(".*1-mgmt$")
     tags:
       - horcm
   - name: Enable horcm service
     service:
       name: "horcm{{horcminst}}"
       enabled: yes
-    when: inventory_hostname | match(".*1-mgmt$")
     tags:
       - horcm
 

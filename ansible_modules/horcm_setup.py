@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import socket, sys
+import platform, sys
 sys.path.append("/home/clallen/work/autobuild/ansible_modules")
 from ldevblock import LDEVBlock
 
@@ -61,17 +61,18 @@ def main():
 
     # populate template
     msg.append("Building HORCM config")
+    hostname = platform.node()
     serial = str(LDEVBlock.get_serial(horcminst))
     ldev_lines = []
     inst_lines = []
-    for disk_group in disk_groups:
-        ldevs = LDEVBlock.hds_scan(disk_group, "ldev")
-        for ldev_name in ldevs.iterkeys():
-            ldev_lines.append(LDEV_COLUMNS_FORMAT.format(disk_group, ldev_name, serial, ldevs[ldev_name], "0"))
-        inst_lines.append(INST_COLUMNS_FORMAT.format(disk_group, SI_HOST, horcminst_str))
+    if hostname.endswith("1"):
+        for disk_group in disk_groups:
+            ldevs = LDEVBlock.hds_scan(disk_group, "ldev")
+            for ldev_name in ldevs.iterkeys():
+                ldev_lines.append(LDEV_COLUMNS_FORMAT.format(disk_group, ldev_name, serial, ldevs[ldev_name], "0"))
+            inst_lines.append(INST_COLUMNS_FORMAT.format(disk_group, SI_HOST, horcminst_str))
     horcm_conf_lines = HORCM_CONF_TEMPLATE.format("#ip_address", "service", "poll(10ms)", "timeout(10ms)",
-                                                  socket.gethostname().split(".")[0], horcminst_str, "1000", "3000",
-                                                  serial,
+                                                  hostname, horcminst_str, "1000", "3000", serial,
                                                   "#dev_group", "dev_name", "Serial#", "CU:LDEV(LDEV#)", "MU#",
                                                   "\n".join(ldev_lines),
                                                   "#dev_group", "ip_address", "service",
