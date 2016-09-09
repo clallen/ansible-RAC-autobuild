@@ -28,6 +28,7 @@
   - name: Add client to AI server
     shell: "/usr/bin/aiconf -H {{mgmt_hostname}} -d {{dns_domain}} -i {{mgmt_ip}} -e {{mac_addr.stdout}} -n {{ai_service}} -c {{cfengine_class}} {{aiconf_build_profiles}}"
     delegate_to: "{{groups['aiserver'][0]}}"
+    ignore_errors: "{{ ansible_check_mode }}"
 
 - name: Install
   hosts: chassis
