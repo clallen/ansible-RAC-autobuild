@@ -2,17 +2,9 @@
 - hosts: storage
 
   tasks:
-  - name: Setup OS storage
+  - name: Allocate storage blocks
     ldevblock:
       horcm: "{{horcminst}}"
-      blocks: "{{os_blocks}}"
-    tags:
-      - os
-  - name: Setup RAC env storage
-    ldevblock:
-      horcm: "{{horcminst}}"
-      blocks: "{{env_blocks}}"
-    tags:
-      - env
+      blocks: "{{ldev_blocks}}"
 
 # vim: tabstop=2 shiftwidth=2

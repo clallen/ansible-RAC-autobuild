@@ -1,5 +1,4 @@
-# RAC node OS
-os_blocks: [
+ldev_blocks: [
 { "name": "autobld1_OS",
 "pool": "36",
 "ports": [ "CL1-B", "CL2-B" ],
@@ -13,10 +12,7 @@ os_blocks: [
 "begin": "6C:4c",
 "end": "6C:4f",
 "size": "50",
-"chassis": [ "rod" ] } ]
-
-# RAC envs
-env_blocks: [
+"chassis": [ "rod" ] },
 { "name": "AUTOBLD_ENV_DATA",
 "pool": "36",
 "ports": [ "CL1-B", "CL2-B" ],
