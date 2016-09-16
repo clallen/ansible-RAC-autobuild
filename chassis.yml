@@ -26,7 +26,7 @@
     shell: "/usr/sbin/ldm list -p -o net {{ldom_name}} | /usr/bin/grep mgmt | /usr/bin/awk -F'|' '{print $5}' | /usr/bin/awk -F= '{print $2}'"
     register: mac_addr
   - name: Add client to AI server
-    shell: "/usr/bin/aiconf -H {{mgmt_hostname}} -d {{dns_domain}} -i {{mgmt_ip}} -e {{mac_addr.stdout}} -n {{ai_service}} -c {{cfengine_class}} {{aiconf_build_profiles}}"
+    shell: "/usr/bin/aiconf -H {{mgmt_hostname}} -d {{dns_domain}} -i {{mgmt_ip}} -e {{mac_addr.stdout}} -n {{ai_service}} -c {{class}} {{aiconf_build_profiles}}"
     delegate_to: "{{groups['aiserver'][0]}}"
     ignore_errors: "{{ ansible_check_mode }}"
 

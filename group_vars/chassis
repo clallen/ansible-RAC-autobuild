@@ -2,12 +2,13 @@
 cores: 1
 memory: 4
 public_pvid: 1427
-cfengine_class: dev
-aiconf_build_profiles: "-b orarac -b pgo_dba -b pgc_pre_release"
-ai_service: solaris-11_3-sru-9_4_0-sparc
+class: dev
+patch_group: pre_release
 
 # static data
 ai_server_ip: 130.164.42.236
+ai_service: solaris-11_3-sru-9_4_0-sparc
+aiconf_build_profiles: "-b orarac -b pgo_dba -b pgc_{{patch_group}}"
 vnets: [ { "vnet": "mgmt0", "vswitch": "primary-vsw0", "id": "0", "pvid": "1" },
          { "vnet": "pubnet0", "vswitch": "primary-vsw1", "id": "1", "pvid": "{{public_pvid}}" },
          { "vnet": "pubnet1", "vswitch": "primary-vsw1", "id": "2", "pvid": "{{public_pvid}}" },
