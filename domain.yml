@@ -125,7 +125,7 @@
     tags:
       - ssh
   - name: SSH to each cluster node
-    shell: "/usr/bin/sudo -u {{item[0]}} /usr/bin/ssh -o 'StrictHostkeyChecking no' -o 'BatchMode yes' {{item[1] | regex_replace('-mgmt$', '')}} 'exit'"
+    shell: "/usr/bin/sudo -u {{item[0]}} /usr/bin/ssh -o 'StrictHostkeyChecking no' -o 'BatchMode yes' {{item[1] | regex_replace('-mgmt$', '')}} 'exit 0'"
     with_nested:
       - [ "oracle", "grid" ]
       - "{{groups['domain']}}"
