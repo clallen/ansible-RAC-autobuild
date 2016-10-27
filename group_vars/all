@@ -1,6 +1,6 @@
 # variable data
 horcminst: 7
-rac_storage: [ "EBIZ_DATA", "EBIZ_FRA", "peach_OCR" ]
+rac_storage: [ "AUTOBLD_DATA", "AUTOBLD_FRA", "autobld_OCR" ]
 
 # static data
 cluster_name: "{{ldom_name | regex_replace('\\d?$', '')}}"
