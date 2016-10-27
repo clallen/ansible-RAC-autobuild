@@ -15,7 +15,7 @@
   - name: Add public IP to hosts file
     lineinfile:
       dest: /etc/inet/hosts
-      line: "{{lookup('dig', ldom_name)}} {{ldom_name}} {{ldom_name}}.{{domain}}"
+      line: "{{lookup('dig', ldom_name)}} {{ldom_name}} {{ldom_name}}.{{dns_domain}}"
     tags:
       - net
   - name: Lookup private IPs

@@ -2,12 +2,16 @@
 skeeter
 
 [chassis]
-todd ldom_name=autobld1
-rod ldom_name=autobld2
+itchy ldom_name=peach1
+scratchy ldom_name=peach2
+mrburns ldom_name=peach3
+smithers ldom_name=peach4
 
 [domain]
-autobld1-mgmt
-autobld2-mgmt
+peach1-mgmt
+peach2-mgmt
+peach3-mgmt
+peach4-mgmt
 
 [aiserver]
 barbrady

@@ -1,5 +1,5 @@
 # variable data
-patch_audit_rev: 2016Q3
+patch_audit_rev: 2017Q1
 
 # static data
 ldom_name: "{{inventory_hostname | regex_replace('-mgmt$', '')}}"
@@ -8,5 +8,4 @@ grid_uid: 61001
 oinstall_gid: 111
 ssh_tmpdir: "/tmp/autobuild_ssh"
 zfs_home_dataset: rpool/apps/users
-domain: natinst.com
 patch_audit_file: /var/cfengine/etc/classes/last_patched
