@@ -68,7 +68,7 @@ def main():
     if hostname.endswith("1"):
         for disk_group in disk_groups:
             ldevs = LDEVBlock.hds_scan(disk_group, "ldev")
-            for ldev_name in ldevs.iterkeys():
+            for ldev_name in sorted(ldevs.keys()):
                 ldev_lines.append(LDEV_COLUMNS_FORMAT.format(disk_group, ldev_name, serial, ldevs[ldev_name], "0"))
             inst_lines.append(INST_COLUMNS_FORMAT.format(disk_group, SI_HOST, horcminst_str))
     horcm_conf_lines = HORCM_CONF_TEMPLATE.format("#ip_address", "service", "poll(10ms)", "timeout(10ms)",

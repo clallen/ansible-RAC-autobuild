@@ -440,6 +440,8 @@ class LDOM:
             for env in self.rac_storage:
                 devices = LDEVBlock.hds_scan(env, "device")
                 for volname in sorted(devices):
+                    if not volname.startswith(env):
+                        continue
                     device = devices[volname]
                     # primary
                     self.vdisks.append( {
