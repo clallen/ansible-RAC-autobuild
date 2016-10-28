@@ -1,6 +1,7 @@
 # variable data
 horcminst: 7
 rac_storage: [ "AUTOBLD_DATA", "AUTOBLD_FRA", "autobld_OCR" ]
+# NOTE: ALL RAC STORAGE MUST BE ON THE FRAME SPECIFIED IN THE horcminst VARIABLE
 
 # static data
 cluster_name: "{{ldom_name | regex_replace('\\d?$', '')}}"
