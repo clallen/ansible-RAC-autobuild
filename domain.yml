@@ -138,6 +138,17 @@
     tags:
       - disk
   
+    # vfstab
+  - name: Setup datapump NFS mount
+    mount:
+      name: /opt/apps/datapump
+      fstype: nfs
+      opts: vers=3,rsize=32768,wsize=32768,rw,intr,bg
+      src: zero:/export/datapump
+      state: mounted
+    tags:
+      - nfs
+
     # horcm
   - name: Install horcm
     pkg5: name=horcm
