@@ -1,6 +1,6 @@
 # variable data
-horcminst: 7
-rac_storage: [ "AUTOBLD_DATA", "AUTOBLD_FRA", "autobld_OCR" ]
+horcminst: 6
+rac_storage: [ "AUTOBLD_ENV_DATA", "AUTOBLD_ENV_FRA", "autobld_OCR" ]
 # NOTE: ALL RAC STORAGE MUST BE ON THE FRAME SPECIFIED IN THE horcminst VARIABLE
 
 # static data

@@ -1,10 +1,10 @@
 # variable data
 cores: 1
 memory: 4
-public_pvid: 1425
+public_pvid: 1427
 mgmt_gw: 130.164.28.1
-class: prod
-patch_group: release
+class: test
+patch_group: pre_release
 ai_service: solaris-11_3-sru-13_4_0-sparc
 
 # static data
