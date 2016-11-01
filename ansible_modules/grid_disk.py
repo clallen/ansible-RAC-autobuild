@@ -18,7 +18,7 @@ def main():
         self.msg.append('RUNNING IN CHECK MODE - NO CHANGES WILL BE MADE')
 
     devnull_fd = open(os.devnull, 'w')
-    for index in range(10, 98):
+    for index in range(10, 90):
         device = "/dev/rdsk/c1d"+str(index)+"s2"
         if not os.path.exists(device):
             continue
