@@ -17,6 +17,8 @@
       rac_storage: "{{rac_storage}}"
       vnets: "{{vnets}}"
       horcminst: "{{horcminst}}"
+  tags:
+    - create
 
 - name: AI
   hosts: chassis
@@ -29,6 +31,8 @@
     shell: "/usr/bin/aiconf -H {{mgmt_hostname}} -d {{dns_domain}} -i {{mgmt_ip}} -e {{mac_addr.stdout}} -n {{ai_service}} -c {{class}} {{aiconf_build_profiles}}"
     delegate_to: "{{groups['aiserver'][0]}}"
     ignore_errors: "{{ ansible_check_mode }}"
+  tags:
+    - ai
 
 - name: Install
   hosts: chassis
@@ -44,5 +48,7 @@
     solaris_ldom:
       name: "{{ldom_name}}"
       domain_vars: { "boot-file": }
+  tags:
+    - install
 
 # vim: tabstop=2 shiftwidth=2
